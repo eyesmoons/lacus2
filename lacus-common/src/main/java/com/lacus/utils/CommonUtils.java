@@ -8,7 +8,15 @@ import org.apache.hadoop.security.UserGroupInformation;
 
 import java.io.IOException;
 
-import static com.lacus.common.constant.Constants.*;
+import static com.lacus.common.constant.Constants.HADOOP_SECURITY_AUTHENTICATION;
+import static com.lacus.common.constant.Constants.HADOOP_SECURITY_AUTHENTICATION_STARTUP_STATE;
+import static com.lacus.common.constant.Constants.JAVA_SECURITY_KRB5_CONF;
+import static com.lacus.common.constant.Constants.JAVA_SECURITY_KRB5_CONF_PATH;
+import static com.lacus.common.constant.Constants.KERBEROS;
+import static com.lacus.common.constant.Constants.LOGIN_USER_KEY_TAB_PATH;
+import static com.lacus.common.constant.Constants.LOGIN_USER_KEY_TAB_USERNAME;
+import static com.lacus.common.constant.Constants.RESOURCE_STORAGE_TYPE;
+import static com.lacus.common.constant.Constants.RESOURCE_UPLOAD_PATH;
 
 /**
  * common utils
@@ -19,8 +27,6 @@ public class CommonUtils {
     private CommonUtils() {
         throw new UnsupportedOperationException("Construct CommonUtils");
     }
-
-    private static String DEFAULT_DATA_QUALITY_JAR_PATH = null;
 
     /**
      * if upload resource is HDFS and kerberos startup is true , else false
@@ -37,7 +43,7 @@ public class CommonUtils {
     /**
      * load kerberos configuration
      *
-     * @param configuration
+     * @param configuration configuration
      * @return load kerberos config return true
      * @throws IOException errors
      */
@@ -108,12 +114,12 @@ public class CommonUtils {
     }
 
     /**
-     * get data hdfs path
+     * get hdfs data path
      *
      * @return data hdfs path
      */
     public static String getHdfsDataBasePath() {
-        String resourceUploadPath = PropertyUtils.getString(RESOURCE_UPLOAD_PATH, "/dolphinscheduler");
+        String resourceUploadPath = PropertyUtils.getString(RESOURCE_UPLOAD_PATH, "/lacus");
         if ("/".equals(resourceUploadPath)) {
             return "";
         } else {

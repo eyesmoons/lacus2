@@ -51,7 +51,7 @@ public interface IStorageOperate {
 
     String getDir(ResourceType resourceType);
 
-    boolean upload(String srcFile, String dstPath, boolean deleteSource, boolean overwrite) throws IOException;
+    void upload(String srcFile, String dstPath, boolean deleteSource, boolean overwrite) throws IOException;
 
     void download(String srcFilePath, String dstFile, boolean overwrite) throws IOException;
 

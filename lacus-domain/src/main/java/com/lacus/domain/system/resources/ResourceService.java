@@ -39,7 +39,10 @@ import java.util.Objects;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
-import static com.lacus.common.constant.Constants.*;
+import static com.lacus.common.constant.Constants.JAR;
+import static com.lacus.common.constant.Constants.MAX_FILE_SIZE;
+import static com.lacus.common.constant.Constants.RESOURCE_FULL_NAME_MAX_LENGTH;
+import static com.lacus.common.constant.Constants.UDF;
 
 /**
  * @author shengyu
@@ -168,7 +171,6 @@ public class ResourceService {
         }
         List<String> allChildren = storageOperate.listFilesStatusRecursively(byId.getFilePath(), defaultPath, resource.getType()).stream().map(StorageEntity::getFullName).collect(Collectors.toList());
         // if resource type is UDF,need check whether it is bound by UDF function
-        // TODO
         // delete file on hdfs
         storageOperate.delete(byId.getFilePath(), allChildren, true);
 

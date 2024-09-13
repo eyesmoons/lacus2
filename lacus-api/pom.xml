@@ -3,32 +3,25 @@
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <parent>
-        <artifactId>lacus</artifactId>
         <groupId>com.lacus</groupId>
+        <artifactId>lacus</artifactId>
         <version>1.0.0</version>
     </parent>
+
     <packaging>jar</packaging>
     <modelVersion>4.0.0</modelVersion>
-    <artifactId>lacus-admin</artifactId>
-
+    <artifactId>lacus-api</artifactId>
     <description>
-        web服务入口
+        api服务入口
     </description>
 
+    <properties>
+        <maven.compiler.source>8</maven.compiler.source>
+        <maven.compiler.target>8</maven.compiler.target>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    </properties>
+
     <dependencies>
-        <dependency>
-            <groupId>org.codehaus.plexus</groupId>
-            <artifactId>plexus-interpolation</artifactId>
-            <version>1.26</version>
-        </dependency>
-
-        <!-- api 模块 -->
-        <dependency>
-            <groupId>com.lacus</groupId>
-            <artifactId>lacus-api</artifactId>
-            <version>1.0.0</version>
-        </dependency>
-
         <!-- 核心模块-->
         <dependency>
             <groupId>com.lacus</groupId>
@@ -39,18 +32,6 @@
         <dependency>
             <groupId>com.lacus</groupId>
             <artifactId>lacus-domain</artifactId>
-        </dependency>
-
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-test</artifactId>
-            <scope>test</scope>
-            <exclusions>
-                <exclusion>
-                    <groupId>org.junit.vintage</groupId>
-                    <artifactId>junit-vintage-engine</artifactId>
-                </exclusion>
-            </exclusions>
         </dependency>
     </dependencies>
 

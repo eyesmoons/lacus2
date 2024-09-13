@@ -1,4 +1,4 @@
-package com.lacus.admin.controller.datasync;
+package com.lacus.api.controller.datasync;
 
 import com.lacus.common.core.dto.ResponseDTO;
 import com.lacus.common.core.page.PageDTO;

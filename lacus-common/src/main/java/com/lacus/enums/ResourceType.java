@@ -1,10 +1,12 @@
 package com.lacus.enums;
 
 import com.baomidou.mybatisplus.annotation.EnumValue;
+import lombok.Getter;
 
 /**
  * resource type
  */
+@Getter
 public enum ResourceType {
 
     /**
@@ -22,12 +24,4 @@ public enum ResourceType {
     @EnumValue
     private final int code;
     private final String descp;
-
-    public int getCode() {
-        return code;
-    }
-
-    public String getDescp() {
-        return descp;
-    }
 }

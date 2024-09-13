@@ -1,4 +1,4 @@
-package com.lacus.admin.controller.metadata;
+package com.lacus.api.controller.metadata;
 
 import com.lacus.common.core.dto.ResponseDTO;
 import com.lacus.domain.metadata.schema.SyncSchemaService;

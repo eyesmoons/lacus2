@@ -1,4 +1,4 @@
-package com.lacus.admin.controller.system;
+package com.lacus.api.controller.config;
 
 
 import com.lacus.common.core.base.BaseController;
@@ -21,15 +21,13 @@ import javax.validation.constraints.Positive;
 import java.util.List;
 
 /**
- * <p>
  * 环境管理 前端控制器
- * </p>
  *
  * @author casey
  */
 @RestController
 @RequestMapping("/system/env")
-public class SysEnvController extends BaseController {
+public class EnvController extends BaseController {
 
     @Autowired
     private EnvService envService;

@@ -5,11 +5,13 @@ import com.lacus.dao.system.entity.SysResourcesEntity;
 import com.lacus.domain.system.env.command.EnvAddCommand;
 import com.lacus.domain.system.resources.command.ResourceAddCommand;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 
 /**
  * @author shengyu
  */
+@EqualsAndHashCode(callSuper = true)
 @Data
 @NoArgsConstructor
 public class ResourceModel extends SysResourcesEntity {

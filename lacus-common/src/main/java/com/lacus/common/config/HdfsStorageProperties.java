@@ -38,19 +38,10 @@ public class HdfsStorageProperties {
     /**
      * Hadoop resouece manager http address port
      */
-    private String hadoopResourceManagerHttpAddressPort =
-            PropertyUtils.getString(HADOOP_RESOURCE_MANAGER_HTTPADDRESS_PORT);
+    private String hadoopResourceManagerHttpAddressPort = PropertyUtils.getString(HADOOP_RESOURCE_MANAGER_HTTPADDRESS_PORT);
 
     /**
      * Hadoop security authentication startup state
      */
-    private boolean hadoopSecurityAuthStartupState =
-            PropertyUtils.getBoolean(HADOOP_SECURITY_AUTHENTICATION_STARTUP_STATE, false);
-
-    /**
-     * Kerberos expire time
-     */
-    public static int getKerberosExpireTime() {
-        return PropertyUtils.getInt(KERBEROS_EXPIRE_TIME, 2);
-    }
+    private boolean hadoopSecurityAuthStartupState = PropertyUtils.getBoolean(HADOOP_SECURITY_AUTHENTICATION_STARTUP_STATE, false);
 }

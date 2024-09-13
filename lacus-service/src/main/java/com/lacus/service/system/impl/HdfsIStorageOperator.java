@@ -7,27 +7,54 @@ import com.lacus.dao.system.entity.StorageEntity;
 import com.lacus.enums.ResUploadType;
 import com.lacus.enums.ResourceType;
 import com.lacus.service.system.IStorageOperate;
-import com.lacus.utils.*;
+import com.lacus.utils.CommonUtils;
+import com.lacus.utils.HttpUtils;
+import com.lacus.utils.JSONUtils;
+import com.lacus.utils.KerberosHttpClient;
+import com.lacus.utils.PropertyUtils;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.fs.FSDataInputStream;
+import org.apache.hadoop.fs.FileStatus;
 import org.apache.hadoop.fs.FileSystem;
-import org.apache.hadoop.fs.*;
+import org.apache.hadoop.fs.FileUtil;
+import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.hdfs.HdfsConfiguration;
 import org.apache.hadoop.security.UserGroupInformation;
 import org.springframework.stereotype.Service;
 
-import java.io.*;
+import java.io.BufferedReader;
+import java.io.Closeable;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.security.PrivilegedExceptionAction;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Date;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static com.lacus.common.constant.Constants.*;
+import static com.lacus.common.constant.Constants.COLON;
+import static com.lacus.common.constant.Constants.COMMA;
+import static com.lacus.common.constant.Constants.DOUBLE_SLASH;
+import static com.lacus.common.constant.Constants.EMPTY_STRING;
+import static com.lacus.common.constant.Constants.FOLDER_SEPARATOR;
+import static com.lacus.common.constant.Constants.FORMAT_S_S;
+import static com.lacus.common.constant.Constants.FS_DEFAULT_FS;
+import static com.lacus.common.constant.Constants.HADOOP_RM_STATE_ACTIVE;
+import static com.lacus.common.constant.Constants.HDFS_DEFAULT_FS;
+import static com.lacus.common.constant.Constants.RESOURCE_TYPE_FILE;
+import static com.lacus.common.constant.Constants.RESOURCE_TYPE_UDF;
 
 @Slf4j
 @Service("storageOperator")
@@ -54,9 +81,8 @@ public class HdfsIStorageOperator implements Closeable, IStorageOperate {
     }
 
     /**
-     * init dolphinscheduler root path in hdfs
+     * init lacus root path in hdfs
      */
-
     private void initHdfsPath() {
         Path path = new Path(RESOURCE_UPLOAD_PATH);
         try {
@@ -269,23 +295,18 @@ public class HdfsIStorageOperator implements Closeable, IStorageOperate {
      * @param dstHdfsPath  destination hdfs path
      * @param deleteSource whether to delete the src
      * @param overwrite    whether to overwrite an existing file
-     * @return if success or not
      * @throws IOException errors
      */
-    public boolean copyLocalToHdfs(String srcFile, String dstHdfsPath, boolean deleteSource,
-                                   boolean overwrite) throws IOException {
+    public void copyLocalToHdfs(String srcFile, String dstHdfsPath, boolean deleteSource, boolean overwrite) throws IOException {
         Path srcPath = new Path(srcFile);
         Path dstPath = new Path(dstHdfsPath);
-
         fs.copyFromLocalFile(deleteSource, overwrite, srcPath, dstPath);
-
-        return true;
     }
 
     @Override
-    public boolean upload(String srcFile, String dstPath, boolean deleteSource,
-                          boolean overwrite) throws IOException {
-        return copyLocalToHdfs(srcFile, dstPath, deleteSource, overwrite);
+    public void upload(String srcFile, String dstPath, boolean deleteSource,
+                       boolean overwrite) throws IOException {
+        copyLocalToHdfs(srcFile, dstPath, deleteSource, overwrite);
     }
 
     /**

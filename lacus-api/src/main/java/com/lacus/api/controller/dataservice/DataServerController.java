@@ -1,4 +1,4 @@
-package com.lacus.admin.controller.dataservice;
+package com.lacus.api.controller.dataservice;
 
 import com.lacus.common.core.dto.ResponseDTO;
 import com.lacus.common.core.page.PageDTO;
@@ -17,7 +17,6 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-
 
 @Api(value = "数据服务", tags = {"接口管理"})
 @RestController
