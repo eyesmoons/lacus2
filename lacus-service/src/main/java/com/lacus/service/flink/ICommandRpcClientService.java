@@ -9,7 +9,7 @@ public interface ICommandRpcClientService {
     /**
      * 提交服务
      */
-    String submitJob(String command, StringBuilder localLog, DeployModeEnum deployModeEnum) throws Exception;
+    String submitJob(String command, DeployModeEnum deployModeEnum) throws Exception;
 
 
     /**

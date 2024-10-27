@@ -26,18 +26,15 @@ public class CommandRpcClientServiceImpl implements ICommandRpcClientService {
     private ICommandService commandService;
 
     @Override
-    public String submitJob(String command, StringBuilder localLog, DeployModeEnum deployModeEnum) throws Exception {
+    public String submitJob(String command, DeployModeEnum deployModeEnum) throws Exception {
         log.info(" 任务提交命令是:{} ", command);
-        localLog.append("启动命令：").append(command).append("\n");
         Process pcs = Runtime.getRuntime().exec(command);
 
         //清理错误日志
         this.clearLogStream(pcs.getErrorStream(), String.format("%s#startForLocal-error#%s", DateUtil.now(), deployModeEnum.name()));
-        String appId = this.clearInfoLogStream(pcs.getInputStream(), localLog, deployModeEnum);
+        String appId = this.clearInfoLogStream(pcs.getInputStream(), deployModeEnum);
         int rs = pcs.waitFor();
-        localLog.append("rs=").append(rs).append("\n");
         if (rs != 0) {
-            localLog.append(" 执行异常 rs=").append(rs).append("   appId=").append(appId);
             throw new RuntimeException("执行异常 is error  rs=" + rs);
         }
         return appId;
@@ -95,7 +92,7 @@ public class CommandRpcClientServiceImpl implements ICommandRpcClientService {
     /**
      * 启动日志输出并且从日志中获取成功后的jobId
      */
-    private String clearInfoLogStream(InputStream stream, StringBuilder localLog, DeployModeEnum deployModeEnum) {
+    private String clearInfoLogStream(InputStream stream, DeployModeEnum deployModeEnum) {
 
         String appId = null;
         BufferedReader reader = null;
@@ -109,18 +106,13 @@ public class CommandRpcClientServiceImpl implements ICommandRpcClientService {
                 if (StringUtils.isEmpty(appId) && result.contains("job-submitted-success:")) {
                     appId = result.replace("job-submitted-success:", " ").trim();
                     log.info("[job-submitted-success] 解析得到的appId是 {}  原始数据 :{}", appId, result);
-                    localLog.append("[job-submitted-success] 解析得到的appId是:")
-                            .append(appId).append("\n");
                 }
                 if (StringUtils.isEmpty(appId) && result
                         .contains("Job has been submitted with JobID")) {
                     appId = result.replace("Job has been submitted with JobID", "")
                             .trim();
                     log.info("[Job has been submitted with JobID] 解析得到的appId是 {}  原始数据 :{}", appId, result);
-                    localLog.append("[Job has been submitted with JobID] 解析得到的appId是:")
-                            .append(appId).append("\n");
                 }
-                localLog.append(result).append("\n");
             }
 
             if (DeployModeEnum.YARN_APPLICATION == deployModeEnum
@@ -128,7 +120,6 @@ public class CommandRpcClientServiceImpl implements ICommandRpcClientService {
                 log.info("yarn 模式 不需要获取appId");
             } else {
                 if (StringUtils.isEmpty(appId)) {
-                    localLog.append("appId无法获 ");
                     throw new RuntimeException("解析appId异常");
                 }
             }

@@ -1,11 +1,16 @@
 package com.lacus.service.flink.impl;
 
+import com.lacus.common.exception.CustomException;
 import com.lacus.dao.flink.entity.FlinkJobEntity;
+import com.lacus.dao.system.entity.SysEnvEntity;
 import com.lacus.enums.DeployModeEnum;
 import com.lacus.service.flink.ICommandService;
 import com.lacus.service.flink.model.JobRunParamDTO;
+import com.lacus.service.system.ISysEnvService;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import static com.lacus.common.constant.Constants.JARVERSION;
@@ -13,7 +18,10 @@ import static com.lacus.common.constant.Constants.JARVERSION;
 @Service
 @Slf4j
 public class CommandServiceImpl implements ICommandService {
-    private static final String APP_CLASS_NAME = "com.flink.streaming.core.JobApplication";
+    private static final String APP_CLASS_NAME = "com.lacus.core.flink.FlinkBatchJobApplication";
+
+    @Autowired
+    private ISysEnvService envService;
 
     /**
      * 本地/Standalone Cluster模式
@@ -21,8 +29,14 @@ public class CommandServiceImpl implements ICommandService {
     @Override
     public String buildRunCommandForCluster(JobRunParamDTO jobRunParamDTO, FlinkJobEntity flinkJobEntity, String savepointPath, String address) throws Exception {
         StringBuilder command = new StringBuilder();
+        Long envId = flinkJobEntity.getEnvId();
+        SysEnvEntity env = envService.getById(envId);
+        if (ObjectUtils.isEmpty(env)) {
+            throw new CustomException("未设置环境变量");
+        }
+        String config = env.getConfig();
+        command.append(config).append("\n");
         command.append(jobRunParamDTO.getFlinkBinPath()).append(" run -d");
-
         if (StringUtils.isNotEmpty(address)) {
             command.append(" -m ").append(address);
         }
@@ -71,6 +85,13 @@ public class CommandServiceImpl implements ICommandService {
     @Override
     public String buildRunCommandForYarnCluster(JobRunParamDTO jobRunParamDTO, FlinkJobEntity flinkJobEntity, String savepointPath) throws Exception {
         StringBuilder command = new StringBuilder();
+        Long envId = flinkJobEntity.getEnvId();
+        SysEnvEntity env = envService.getById(envId);
+        if (ObjectUtils.isEmpty(env)) {
+            throw new CustomException("未设置环境变量");
+        }
+        String config = env.getConfig();
+        command.append(config).append("\n");
         command.append(jobRunParamDTO.getFlinkBinPath());
         if (DeployModeEnum.YARN_APPLICATION == flinkJobEntity.getDeployMode()) {
             command.append("  run-application -t yarn-application  ");

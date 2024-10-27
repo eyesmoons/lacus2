@@ -1,6 +1,5 @@
 package com.lacus.service.flink;
 
-import cn.hutool.core.date.DateUtil;
 import com.lacus.common.exception.CustomException;
 import com.lacus.dao.flink.entity.FlinkJobEntity;
 import com.lacus.enums.FlinkJobTypeEnum;
@@ -8,11 +7,9 @@ import com.lacus.enums.FlinkStatusEnum;
 import com.lacus.service.flink.model.JobRunParamDTO;
 import com.lacus.service.flink.model.StandaloneFlinkJobInfo;
 import com.lacus.utils.CommonThreadPoolUtil;
-import com.lacus.utils.IpUtil;
 import com.lacus.utils.file.FileUtil;
 import com.lacus.utils.yarn.YarnUtil;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -84,65 +81,34 @@ public class FlinkJobBaseService {
             public void run() {
                 String appId = "";
                 THREADAPPID.set(appId);
-                boolean success = true;
-                StringBuilder localLog = new StringBuilder()
-                        .append("开始提交任务：")
-                        .append(DateUtil.now()).append("\n")
-                        .append("第三方jar: ").append("\n");
-                if (flinkJobEntity.getExtJarPath() != null) {
-                    localLog.append(flinkJobEntity.getExtJarPath());
-                }
-                localLog.append("\n")
-                        .append("客户端IP：").append(IpUtil.getInstance().getLocalIP())
-                        .append("\n");
                 try {
                     String command = "";
-                    String hadoopClassPath = System.getenv("HADOOP_CLASSPATH");
-                    if (ObjectUtils.isEmpty(hadoopClassPath)) {
-                        throw new CustomException("请配置环境变量[HADOOP_CLASSPATH]");
-                    }
-                    log.info("HADOOP_CLASSPATH：{}", hadoopClassPath);
-                    localLog.append("HADOOP_CLASSPATH=").append(hadoopClassPath).append("\n");
                     // 如果是自定义提交jar模式下载文件到本地
                     this.downJar(jobRunParamDTO, flinkJobEntity);
                     switch (flinkJobEntity.getDeployMode()) {
                         case YARN_PER:
                         case YARN_APPLICATION:
-                            if (StringUtils.isEmpty(hadoopClassPath)) {
-                                throw new CustomException("yarn 模式 需要在客户端配置 HADOOP_CLASSPATH环境变量");
-                            }
-                            log.info("YARN模式下 HADOOP_CLASSPATH: {}", hadoopClassPath);
-
                             //1、构建执行命令
-                            command = commandService.buildRunCommandForYarnCluster(jobRunParamDTO,
-                                    flinkJobEntity, savepointPath);
+                            command = commandService.buildRunCommandForYarnCluster(jobRunParamDTO, flinkJobEntity, savepointPath);
                             //2、提交任务
-                            appId = this.submitJobForYarn(command, flinkJobEntity, localLog);
+                            appId = this.submitJobForYarn(command, flinkJobEntity);
                             THREADAPPID.set(appId);
                             break;
                         case LOCAL:
                         case STANDALONE:
                             String address = flinkRpcService.getFlinkHttpAddress(flinkJobEntity.getDeployMode());
                             log.info("flink 远程提交地址是 address={}", address);
-                            localLog.append("address=").append(address).append("\n");
                             //1、构建执行命令
                             command = commandService.buildRunCommandForCluster(jobRunParamDTO, flinkJobEntity, savepointPath, address);
                             //2、提交任务
-                            appId = this.submitJobForStandalone(command, flinkJobEntity, localLog);
+                            appId = this.submitJobForStandalone(command, flinkJobEntity);
                             break;
                         default:
                             log.warn("不支持的模式 {}", flinkJobEntity.getDeployMode());
                     }
                 } catch (Exception e) {
                     log.error("任务[{}]执行异常！", flinkJobEntity.getJobId(), e);
-                    success = false;
                 } finally {
-                    localLog.append("\n启动结束时间: ").append(DateUtil.now()).append("\n");
-                    if (success) {
-                        localLog.append("客户端提交任务成功");
-                    } else {
-                        localLog.append("启动失败");
-                    }
                     if (StringUtils.isBlank(appId)) { // 解决任务异常，但已经生成了appID，但没有传递给上层调用方法的问题
                         appId = THREADAPPID.get();
                         log.info("任务[{}]执行异常, appid: {}", flinkJobEntity.getJobId(), appId);
@@ -162,26 +128,24 @@ public class FlinkJobBaseService {
                 }
             }
 
-            private String submitJobForStandalone(String command, FlinkJobEntity flinkJobEntity, StringBuilder localLog) throws Exception {
-                String appId = commandRpcClientService.submitJob(command, localLog, flinkJobEntity.getDeployMode());
+            private String submitJobForStandalone(String command, FlinkJobEntity flinkJobEntity) throws Exception {
+                String appId = commandRpcClientService.submitJob(command, flinkJobEntity.getDeployMode());
                 StandaloneFlinkJobInfo jobStandaloneInfo = flinkRpcService.getJobInfoForStandaloneByAppId(appId, flinkJobEntity.getDeployMode());
 
                 if (jobStandaloneInfo == null || StringUtils.isNotEmpty(jobStandaloneInfo.getErrors())) {
                     log.error("[submitJobForStandalone] is error jobStandaloneInfo={}", jobStandaloneInfo);
-                    localLog.append("\n 任务失败 appId：").append(appId);
                     throw new CustomException("任务失败");
                 } else {
                     if (!FlinkStatusEnum.RUNNING.name().equals(jobStandaloneInfo.getState())
                             && !FlinkStatusEnum.FINISHED.name().equals(jobStandaloneInfo.getState())) {
-                        localLog.append("\n 任务失败 appId：").append(appId).append("状态为：").append(jobStandaloneInfo.getState());
                         throw new CustomException("[submitJobForStandalone]任务失败");
                     }
                 }
                 return appId;
             }
 
-            private String submitJobForYarn(String command, FlinkJobEntity jobConfigDTO, StringBuilder localLog) throws Exception {
-                commandRpcClientService.submitJob(command, localLog, jobConfigDTO.getDeployMode());
+            private String submitJobForYarn(String command, FlinkJobEntity jobConfigDTO) throws Exception {
+                commandRpcClientService.submitJob(command, jobConfigDTO.getDeployMode());
                 return IYarnRpcService.getAppIdByYarn(jobConfigDTO.getJobName(), YarnUtil.getQueueName(jobConfigDTO.getFlinkRunConfig()));
             }
         });
