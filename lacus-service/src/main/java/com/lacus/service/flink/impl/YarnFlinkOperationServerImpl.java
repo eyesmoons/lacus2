@@ -1,9 +1,11 @@
 package com.lacus.service.flink.impl;
 
+import com.lacus.common.exception.CustomException;
 import com.lacus.dao.flink.entity.FlinkJobEntity;
 import com.lacus.dao.flink.entity.FlinkJobInstanceEntity;
 import com.lacus.enums.FlinkStatusEnum;
 import com.lacus.service.flink.FlinkJobBaseService;
+import com.lacus.service.flink.ICommandRpcClientService;
 import com.lacus.service.flink.IFlinkJobInstanceService;
 import com.lacus.service.flink.IFlinkJobService;
 import com.lacus.service.flink.IFlinkOperationService;
@@ -15,6 +17,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import static com.lacus.common.constant.Constants.DEFAULT_SAVEPOINT_PATH;
 import static com.lacus.common.constant.Constants.YARN_FLINK_OPERATION_SERVER;
 
 /**
@@ -38,6 +41,9 @@ public class YarnFlinkOperationServerImpl implements IFlinkOperationService {
 
     @Autowired
     private IYarnRpcService yarnRpcService;
+
+    @Autowired
+    private ICommandRpcClientService commandRpcClientService;
 
     @Override
     public void start(Long jobId, Boolean resume) {
@@ -74,18 +80,46 @@ public class YarnFlinkOperationServerImpl implements IFlinkOperationService {
     }
 
     @Override
-    public void resume(Long jobId, String savepoint) {
-
+    public void stop(Long jobId, Boolean isSavePoint) {
+        log.info("开始停止任务[{}]", jobId);
+        FlinkJobEntity flinkJobEntity = flinkJobService.getById(jobId);
+        if (flinkJobEntity == null) {
+            throw new CustomException("任务不存在");
+        }
+        //1、停止前做一次savepoint操作
+        try {
+            this.savepoint(jobId);
+        } catch (Exception e) {
+            log.error("执行savePoint失败", e);
+        }
+        //2、停止任务
+        this.stop(flinkJobEntity);
+        //3、变更状态
+        flinkJobService.updateStatus(jobId, FlinkStatusEnum.STOP);
     }
 
-    @Override
-    public void pause(Long jobId) {
+    public void savepoint(Long jobId) {
+        FlinkJobEntity flinkJobEntity = flinkJobService.getById(jobId);
+        flinkJobBaseService.checkSavepoint(flinkJobEntity);
 
-    }
+        YarnJobInfo jobInfo = yarnRpcService.getJobInfoForPerYarnByAppId(flinkJobEntity.getAppId());
+        if (jobInfo == null) {
+            throw new CustomException("yarn集群上没有找到对应任务");
+        }
+        //1、 执行savepoint
+        try {
+            commandRpcClientService.savepointForPerYarn(jobInfo.getId(), DEFAULT_SAVEPOINT_PATH + jobId, flinkJobEntity.getAppId());
+        } catch (Exception e) {
+            throw new CustomException("执行savePoint失败");
+        }
 
-    @Override
-    public void stop(Long jobId) {
-
+        String savepointPath = yarnRpcService.getSavepointPath(flinkJobEntity.getAppId(), jobInfo.getId());
+        if (StringUtils.isEmpty(savepointPath)) {
+            throw new CustomException("没有获取到savepointPath路径");
+        }
+        //2、 执行保存Savepoint到本地数据库
+        flinkJobEntity.setSavepoint(savepointPath);
+        flinkJobService.saveOrUpdate(flinkJobEntity);
     }
 
     private void stop(FlinkJobEntity flinkJobEntity) {
