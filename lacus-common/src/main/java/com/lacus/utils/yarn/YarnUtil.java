@@ -5,6 +5,7 @@ import com.google.common.collect.Sets;
 import com.lacus.common.constant.Constants;
 import com.lacus.utils.hdfs.HdfsUtil;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.cli.ParseException;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
@@ -182,6 +183,7 @@ public class YarnUtil {
 
     /**
      * 停止yarn 任务
+     *
      * @param appId:     yarn applicationId
      * @param jobId:     Flink JobId
      * @param flinkConf: flink配置文件
@@ -205,6 +207,7 @@ public class YarnUtil {
 
     /**
      * 取消yarn任务
+     *
      * @param appId:     yarn applicationId
      * @param jobId:     Flink JobId
      * @param flinkConf: flink配置文件
@@ -307,6 +310,12 @@ public class YarnUtil {
             log.error("配置文件加载出错", e);
         }
         return props;
+    }
+
+    public static String getQueueName(String flinkRunConfig) throws ParseException {
+        String getYarnQueueName = ConfigUtil.getYarnQueueName(flinkRunConfig);
+        log.info("得到队列名称是：getYarnQueueName: {}", getYarnQueueName);
+        return getYarnQueueName;
     }
 
     public static void main(String[] args) throws Exception {

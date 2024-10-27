@@ -3,10 +3,13 @@ package com.lacus.utils.yarn;
 import com.lacus.common.constant.Constants;
 import com.lacus.utils.PropertiesUtil;
 import com.lacus.utils.hdfs.HdfsUtil;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.hadoop.conf.Configuration;
 
 import java.io.ByteArrayInputStream;
 import java.io.File;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 
@@ -43,5 +46,30 @@ public class ConfigUtil {
             separator = "";
         }
         return separator;
+    }
+
+    public static String getYarnQueueName(String flinkRunConfig) {
+        String[] configs = trim(flinkRunConfig);
+        for (String config : configs) {
+            if (config.contains("-Dyarn.application.queue=")) {
+                String value = config.split("=")[1];
+                if (StringUtils.isEmpty(value)) {
+                    return "default";
+                }
+                return value;
+            }
+        }
+        return "default";
+    }
+
+    private static String[] trim(String cliConfig) {
+        List<String> list = new ArrayList<>();
+        String[] config = cliConfig.split(" ");
+        for (String str : config) {
+            if (StringUtils.isNotEmpty(str)) {
+                list.add(str);
+            }
+        }
+        return list.toArray(new String[0]);
     }
 }

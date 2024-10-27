@@ -94,4 +94,15 @@ public class Constants {
     public static final String PARAMETER_DATETIME = "system.datetime";
     public static final String PARAMETER_FORMAT_TIME = "yyyyMMddHHmmss";
     public static final String PARAMETER_SHECDULE_TIME = "schedule.time";
+
+    public static final String STANDALONE_FLINK_OPERATION_SERVER = "standaloneFlinkOperationServer";
+    public static final String YARN_FLINK_OPERATION_SERVER = "yarnFlinkOperationServer";
+    // flink Rest web 地址(Local Cluster模式)
+    public static final String FLINK_HTTP_ADDRESS = "flink.rest.http.address";
+    // flink Rest web HA 地址(Standalone Cluster模式 支持HA 可以填写多个地址,用;分隔)
+    public static final String FLINK_REST_HA_HTTP_ADDRESS = "flink.rest.ha.http.address";
+    public static final String JARVERSION = "lib/flink-streaming-core-1.5.0.RELEASE.jar";
+    public static final String YARN_RM_HTTP_ADDRESS = "yarn.rm.http.address";
+    public static final String DEFAULT_SAVEPOINT_PATH = "hdfs:///flink/savepoint/lacus/";
+
 }

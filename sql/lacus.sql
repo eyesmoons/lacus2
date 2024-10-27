@@ -921,4 +921,52 @@ CREATE TABLE `sys_resources` (
      UNIQUE KEY `sys_resources_un` (`file_path`,`type`)
 ) ENGINE=InnoDB;
 
+-- ----------------------------
+-- Table structure for flink_job
+-- ----------------------------
+CREATE TABLE `flink_job` (
+    `job_id` bigint NOT NULL AUTO_INCREMENT COMMENT '自增主键',
+    `job_name` varchar(100) NOT NULL COMMENT '任务名称',
+    `app_id` varchar(100) NOT NULL COMMENT 'application id',
+    `save_point` varchar(100) NOT NULL COMMENT 'savepoint',
+    `job_type` varchar(10) NOT NULL COMMENT '任务类型 FLINK_SQL_STREAMING, FLINK_SQL_BATCH, FLINK_JAR',
+    `deploy_mode` varchar(100) NOT NULL COMMENT '部署模式：YARN_PER, STANDALONE, LOCAL, YARN_APPLICATION',
+    `flink_sql` text DEFAULT NULL COMMENT 'flink sql',
+    `main_jar_path` varchar(100) DEFAULT NULL COMMENT '主jar包路径',
+    `ext_jar_path` varchar(100) DEFAULT NULL COMMENT '第三方jar udf、 连接器等',
+    `main_class` varchar(100) COMMENT '主类名',
+    `flink_run_config` varchar(200) DEFAULT NULL COMMENT 'flink参数',
+    `custom_args` varchar(200) DEFAULT NULL COMMENT '自定义参数',
+    `env_id` bigint DEFAULT NULL COMMENT '环境id',
+    `job_status` int DEFAULT NULL COMMENT '任务状态：1 提交成功 ，2 运行中，3 成功，4 失败',
+    `remark` varchar(100) DEFAULT NULL COMMENT '任务描述',
+    `deleted` tinyint NOT NULL DEFAULT '0' COMMENT '删除标识：正常 0 删除 1',
+    `creator_id` varchar(64) NOT NULL DEFAULT '' COMMENT '创建人',
+    `create_time` datetime NOT NULL COMMENT '创建时间',
+    `updater_id` varchar(128) DEFAULT NULL COMMENT '修改人',
+    `update_time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+    PRIMARY KEY (`job_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='flink任务表';
+
+-- ----------------------------
+-- Table structure for flink_job_instance
+-- ----------------------------
+CREATE TABLE `flink_job_instance` (
+    `instance_id` bigint NOT NULL AUTO_INCREMENT COMMENT '自增主键',
+    `job_id` bigint NOT NULL COMMENT '任务ID',
+    `instance_name` varchar(150) NOT NULL DEFAULT '' COMMENT '实例名称',
+    `application_id` varchar(100) DEFAULT NULL COMMENT 'flink任务ID',
+    `save_point` varchar(200) DEFAULT NULL COMMENT 'savepoint地址',
+    `flink_job_id` varchar(100) DEFAULT NULL COMMENT 'flink任务ID',
+    `job_script` longtext COMMENT '任务脚本',
+    `submit_time` datetime DEFAULT NULL COMMENT '任务提交时间',
+    `finished_time` datetime DEFAULT NULL COMMENT '任务结束时间',
+    `status` tinyint NOT NULL DEFAULT '1' COMMENT '任务状态 RUNNING, KILL, FAILED',
+    `deleted` tinyint NOT NULL DEFAULT '0' COMMENT '删除标识：正常 0 删除 1',
+    `creator_id` varchar(64) NOT NULL DEFAULT '' COMMENT '创建人',
+    `create_time` datetime NOT NULL COMMENT '创建时间',
+    `updater_id` varchar(128) DEFAULT NULL COMMENT '修改人',
+    `update_time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+    PRIMARY KEY (`instance_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='flink任务实例表';
 SET FOREIGN_KEY_CHECKS = 1;

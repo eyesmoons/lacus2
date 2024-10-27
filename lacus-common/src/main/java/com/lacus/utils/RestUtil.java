@@ -22,74 +22,83 @@ public class RestUtil {
     @Autowired
     private RestTemplate restTemplate;
 
-    public Object getForObject(String url){
+    public String getForString(String url) {
         try {
             URI uri = new URIBuilder(url).build();
-            return restTemplate.getForObject(uri,Object.class);
+            return restTemplate.getForObject(uri, String.class);
         } catch (Exception e) {
             throw new ApiException(ErrorCode.Internal.UNKNOWN_ERROR, "rest api请求失败: " + e.getMessage());
         }
     }
 
-    public JSONObject getForJsonObject(String url){
+    public Object getForObject(String url) {
+        try {
+            URI uri = new URIBuilder(url).build();
+            return restTemplate.getForObject(uri, Object.class);
+        } catch (Exception e) {
+            throw new ApiException(ErrorCode.Internal.UNKNOWN_ERROR, "rest api请求失败: " + e.getMessage());
+        }
+    }
+
+    public JSONObject getForJsonObject(String url) {
         try {
             URI uri = new URIBuilder(url).build();
             return restTemplate.getForObject(uri, JSONObject.class);
         } catch (Exception e) {
-            log.error("rest api请求失败:",e);
+            log.error("rest api请求失败:", e);
             throw new ApiException(ErrorCode.Internal.UNKNOWN_ERROR, "rest api请求失败");
         }
     }
 
-    public JSONObject postForJsonObject(String url, JSONObject param){
+    public JSONObject postForJsonObject(String url, JSONObject param) {
         try {
             URI uri = new URIBuilder(url).build();
-            return restTemplate.postForObject(uri,param, JSONObject.class);
+            return restTemplate.postForObject(uri, param, JSONObject.class);
         } catch (Exception e) {
-            log.error("rest api请求失败:",e);
+            log.error("rest api请求失败:", e);
             throw new ApiException(ErrorCode.Internal.UNKNOWN_ERROR, "rest api请求失败");
         }
     }
 
     public <T> ResponseEntity<T> exchangeGet(String url, HttpHeaders headers, Class<T> responseType, Object... uriVariables) {
-        try{
-            HttpEntity<JSONObject> httpEntity = new HttpEntity<>( headers);
+        try {
+            HttpEntity<JSONObject> httpEntity = new HttpEntity<>(headers);
             return restTemplate.exchange(url, HttpMethod.GET, httpEntity, responseType, uriVariables);
-        }catch (Exception ex){
-            log.error("rest api请求失败:",ex);
+        } catch (Exception ex) {
+            log.error("rest api请求失败:", ex);
             throw new ApiException(ErrorCode.Internal.UNKNOWN_ERROR, "rest api请求失败");
         }
     }
 
     @SuppressWarnings({"rawtypes", "unchecked"})
     public <T> ResponseEntity<T> postForEntity(String url, HttpHeaders headers, Object param, Class<T> responseType) {
-        try{
+        try {
             HttpEntity httpEntity = new HttpEntity(param, headers);
             return restTemplate.postForEntity(url, httpEntity, responseType);
-        }catch (Exception ex){
-            log.error("rest api请求失败:",ex);
+        } catch (Exception ex) {
+            log.error("rest api请求失败:", ex);
             throw new ApiException(ErrorCode.Internal.UNKNOWN_ERROR, "rest api请求失败");
         }
     }
 
     @SuppressWarnings({"rawtypes", "unchecked"})
     public <T> ResponseEntity<T> exchangePut(String url, HttpHeaders headers, Object param, Class<T> responseType) {
-        try{
-            HttpEntity httpEntity = new HttpEntity(param,headers);
-            return restTemplate.exchange(url, HttpMethod.PUT, httpEntity,responseType);
-        }catch (Exception ex){
-            log.error("rest api请求失败:",ex);
+        try {
+            HttpEntity httpEntity = new HttpEntity(param, headers);
+            return restTemplate.exchange(url, HttpMethod.PUT, httpEntity, responseType);
+        } catch (Exception ex) {
+            log.error("rest api请求失败:", ex);
             throw new ApiException(ErrorCode.Internal.UNKNOWN_ERROR, "rest api请求失败");
         }
     }
 
     @SuppressWarnings({"rawtypes", "unchecked"})
     public <T> ResponseEntity<T> exchangeDelete(String url, HttpHeaders headers, Class<T> responseType) {
-        try{
-            HttpEntity httpEntity = new HttpEntity( headers);
+        try {
+            HttpEntity httpEntity = new HttpEntity(headers);
             return restTemplate.exchange(url, HttpMethod.DELETE, httpEntity, responseType);
-        }catch (Exception ex){
-            log.error("rest api请求失败:",ex);
+        } catch (Exception ex) {
+            log.error("rest api请求失败:", ex);
             throw new ApiException(ErrorCode.Internal.UNKNOWN_ERROR, "rest api请求失败");
         }
     }
