@@ -29,7 +29,7 @@ public class FlinkBatchJobApplication {
         try {
             Arrays.stream(args).forEach(arg -> logger.info("{}", arg));
             JobRunParam jobRunParam = buildParam(args);
-            List<String> fileList = null;
+            List<String> fileList;
 
             if (UrlUtils.isHttpsOrHttp(jobRunParam.getSqlPath())) {
                 fileList = UrlUtils.getSqlList(jobRunParam.getSqlPath());
