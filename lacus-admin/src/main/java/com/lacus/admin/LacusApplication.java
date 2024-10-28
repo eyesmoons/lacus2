@@ -1,5 +1,6 @@
 package com.lacus.admin;
 
+import cn.hutool.core.date.DateUtil;
 import com.lacus.core.factory.MetaDatasourceFactory;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,11 +21,12 @@ public class LacusApplication {
 
     public static void main(String[] args) {
         SpringApplication.run(LacusApplication.class, args);
-        System.out.println("启动成功");
+        System.out.println("Lacus大数据平台启动成功："+ DateUtil.now());
     }
 
     @EventListener
     public void run(ApplicationReadyEvent event) {
+        log.info("开始注册数据源...");
         metaDatasourceFactory.register();
     }
 }

@@ -15,6 +15,7 @@ public class MetaDatasourceFactory {
     private static final Logger logger = LoggerFactory.getLogger(MetaDatasourceFactory.class);
 
     private final Map<String, AbsDatasourceProcessor> context = new HashMap<>();
+
     /**
      * 所有processor必须注册到Factory
      */
@@ -24,12 +25,13 @@ public class MetaDatasourceFactory {
             try {
                 register(processor);
             } catch (Exception e) {
-                logger.error("new instance " + processor.getClass().getName() + " error: ", e);
+                logger.error("new instance {} error: ", processor.getClass().getName(), e);
             }
         }
     }
 
     private void register(AbsDatasourceProcessor processor) {
+        logger.info("数据源[{}]注册成功！", processor.getDatasourceName());
         context.put(processor.getDatasourceName(), processor);
     }
 
@@ -37,5 +39,6 @@ public class MetaDatasourceFactory {
         return context.get(name);
     }
 
-    private MetaDatasourceFactory() {}
+    private MetaDatasourceFactory() {
+    }
 }
