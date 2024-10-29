@@ -2,27 +2,55 @@ package com.lacus.domain.common.utils;
 
 import com.lacus.common.constant.Constants;
 import com.lacus.common.exception.CustomException;
+import com.lacus.dao.datasync.entity.DataSyncJobEntity;
+import com.lacus.dao.datasync.entity.DataSyncJobInstanceEntity;
+import com.lacus.dao.datasync.entity.DataSyncSavedColumn;
+import com.lacus.dao.datasync.entity.DataSyncSavedTable;
+import com.lacus.dao.datasync.entity.DataSyncSinkTableEntity;
+import com.lacus.dao.datasync.entity.DataSyncSourceTableEntity;
+import com.lacus.dao.datasync.enums.FlinkStatusEnum;
+import com.lacus.dao.metadata.entity.MetaDatasourceEntity;
+import com.lacus.domain.common.dto.JobConf;
+import com.lacus.domain.common.dto.JobInfo;
+import com.lacus.domain.common.dto.Sink;
+import com.lacus.domain.common.dto.SinkDataSource;
+import com.lacus.domain.common.dto.Source;
+import com.lacus.domain.common.dto.SourceJobConf;
+import com.lacus.domain.common.dto.StreamLoadProperty;
+import com.lacus.domain.datasync.job.JobMonitorService;
+import com.lacus.service.datasync.IDataSyncColumnMappingService;
+import com.lacus.service.datasync.IDataSyncJobInstanceService;
+import com.lacus.service.datasync.IDataSyncJobService;
+import com.lacus.service.datasync.IDataSyncSinkTableService;
+import com.lacus.service.datasync.IDataSyncSourceTableService;
+import com.lacus.service.datasync.IDataSyncTableMappingService;
+import com.lacus.service.metadata.IMetaDataSourceService;
+import com.lacus.utils.PropertyUtils;
 import com.lacus.utils.hdfs.HdfsUtil;
 import com.lacus.utils.time.DateUtils;
 import com.lacus.utils.yarn.FlinkConf;
 import com.lacus.utils.yarn.YarnUtil;
-import com.lacus.dao.datasync.entity.*;
-import com.lacus.dao.datasync.enums.FlinkStatusEnum;
-import com.lacus.dao.metadata.entity.MetaDatasourceEntity;
-import com.lacus.domain.common.dto.*;
-import com.lacus.domain.datasync.job.JobMonitorService;
-import com.lacus.service.datasync.*;
-import com.lacus.service.metadata.IMetaDataSourceService;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.ObjectUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import java.text.ParsePosition;
 import java.text.SimpleDateFormat;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 import java.util.stream.Collectors;
+
+import static com.lacus.common.constant.Constants.DEFAULT_HDFS_CONFIG;
+import static com.lacus.common.constant.Constants.FLINK_HDFS_COLLECTOR_CONF_PATH;
+import static com.lacus.common.constant.Constants.FLINK_HDFS_COLLECTOR_JOB_JARS_PATH;
+import static com.lacus.common.constant.Constants.KAFKA_SERVERS;
 
 /**
  * @created by shengyu on 2024/2/26 20:59
@@ -30,18 +58,6 @@ import java.util.stream.Collectors;
 @Component
 @Slf4j
 public class JobUtil {
-
-    @Value("${kafka.bootstrapServers}")
-    private String bootstrapServers;
-
-    @Value("${flink.job-jars-path}")
-    private String jarHdfsPath;
-
-    @Value("${flink.conf-path}")
-    private String flinkConfPath;
-
-    @Value("${hdfs.defaultFS}")
-    private String defaultFS;
 
     @Autowired
     IMetaDataSourceService dataSourceService;
@@ -92,7 +108,7 @@ public class JobUtil {
             source.setTimeStamp(sourceJobConf.getTimeStamp());
         }
         source.setSourceName(sourceJobConf.getSourceName());
-        source.setBootStrapServers(bootstrapServers);
+        source.setBootStrapServers(PropertyUtils.getString(KAFKA_SERVERS));
         source.setTopics(Collections.singletonList(buildTopic(job.getJobId())));
         source.setGroupId(buildGroupId(job.getJobId()));
 
@@ -215,7 +231,7 @@ public class JobUtil {
         List<String> sourceTableNames = sourceTables.stream().map(sourceTable -> sourceTable.getSourceDbName() + "." + sourceTable.getSourceTableName()).collect(Collectors.toList());
         MetaDatasourceEntity metaDatasource = dataSourceService.getById(job.getSourceDatasourceId());
         if (ObjectUtils.isNotEmpty(metaDatasource)) {
-            sourceJobConf.setBootStrapServer(bootstrapServers);
+            sourceJobConf.setBootStrapServer(PropertyUtils.getString(KAFKA_SERVERS));
             sourceJobConf.setTopic(buildTopic(job.getJobId()));
             sourceJobConf.setSourceName(metaDatasource.getDatasourceName());
             sourceJobConf.setDatasourceType(metaDatasource.getType().toLowerCase());
@@ -302,7 +318,7 @@ public class JobUtil {
             try {
                 for (int i = 0; i < 5; i++) {
                     // 停止flink任务
-                    YarnUtil.cancelYarnJob(applicationId, flinkJobId, flinkConfPath, defaultFS);
+                    YarnUtil.cancelYarnJob(applicationId, flinkJobId, PropertyUtils.getString(FLINK_HDFS_COLLECTOR_CONF_PATH));
                 }
                 // 修改任务状态
                 updateStopStatusForInstance(instance);
@@ -321,10 +337,10 @@ public class JobUtil {
      *
      * @param jarName jar包名称
      */
-    public String getJobJarPath(String jarName, String defaultHdfs) {
-        String fsPrefix = ObjectUtils.isEmpty(defaultFS) ? Constants.DEFAULT_HDFS : defaultFS;
-        String hdfsJarPath = fsPrefix + jarHdfsPath + jarName;
-        if (!HdfsUtil.exists(hdfsJarPath, defaultHdfs)) {
+    public String getJobJarPath(String jarName) {
+        String fsPrefix = ObjectUtils.isEmpty(PropertyUtils.getString(DEFAULT_HDFS_CONFIG)) ? Constants.DEFAULT_HDFS_CONFIG : PropertyUtils.getString(DEFAULT_HDFS_CONFIG);
+        String hdfsJarPath = fsPrefix + PropertyUtils.getString(FLINK_HDFS_COLLECTOR_JOB_JARS_PATH) + jarName;
+        if (!HdfsUtil.exists(hdfsJarPath)) {
             throw new RuntimeException("找不到路径:" + hdfsJarPath);
         }
         return hdfsJarPath;

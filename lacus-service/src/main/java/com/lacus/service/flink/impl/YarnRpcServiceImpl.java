@@ -9,12 +9,13 @@ import com.lacus.service.flink.IYarnRpcService;
 import com.lacus.service.flink.model.AppTO;
 import com.lacus.service.flink.model.YarnAppInfo;
 import com.lacus.service.flink.model.YarnJobInfo;
+import com.lacus.utils.PropertyUtils;
 import com.lacus.utils.RestUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 
-import static com.lacus.common.constant.Constants.YARN_RM_HTTP_ADDRESS;
+import static com.lacus.common.constant.Constants.YARN_RESTAPI_ADDRESS;
 
 @Service
 @Slf4j
@@ -51,9 +52,9 @@ public class YarnRpcServiceImpl implements IYarnRpcService {
     }
 
     public String getYarnRmHttpAddress() {
-        String urlHa = System.getenv(YARN_RM_HTTP_ADDRESS);
+        String urlHa = PropertyUtils.getString(YARN_RESTAPI_ADDRESS);
         if (StringUtils.isEmpty(urlHa)) {
-            throw new CustomException("请配置环境变量[" + YARN_RM_HTTP_ADDRESS + "]");
+            throw new CustomException("请配置环境变量[" + YARN_RESTAPI_ADDRESS + "]");
         }
         return getActiveYarnUrl(urlHa);
     }
@@ -80,15 +81,16 @@ public class YarnRpcServiceImpl implements IYarnRpcService {
 
     @Override
     public void stopJobByJobId(String appId) {
-        log.info("执行stopJobByJobId appId={}", appId);
+        log.info("[stop job]appId：{}", appId);
         if (StringUtils.isEmpty(appId)) {
             throw new CustomException("appId为空");
         }
         String url = getYarnRmHttpAddress() + "ws/v1/cluster/apps/" + appId + "/state";
-        log.info("请求关闭 URL：{}", url);
+        log.info("[stop job]请求url：{}", url);
         JSONObject params = new JSONObject();
         params.put("state", "KILLED");
-        restUtil.postForJsonObject(url, params);
+        JSONObject result = restUtil.postForJsonObject(url, params);
+        log.info("[stop job]请求结果：{}", result);
     }
 
     @Override
@@ -96,7 +98,6 @@ public class YarnRpcServiceImpl implements IYarnRpcService {
         if (StringUtils.isEmpty(appId)) {
             throw new CustomException("appId为空");
         }
-
         String url = getYarnRmHttpAddress() + "ws/v1/cluster/apps/" + appId + "/state";
         String res = restUtil.getForString(url);
         if (StringUtils.isEmpty(res)) {
@@ -124,7 +125,7 @@ public class YarnRpcServiceImpl implements IYarnRpcService {
             jobInfo.setStatus((String) jsonObject.get("status"));
             return jobInfo;
         } catch (Exception e) {
-            log.error("[getJobInfoForPerYarnByAppId] 错误  ", e);
+            log.error("[getJobInfoForPerYarnByAppId]出错  ", e);
         }
         return null;
     }
@@ -137,7 +138,7 @@ public class YarnRpcServiceImpl implements IYarnRpcService {
 
         String url = getYarnRmHttpAddress() + "/proxy/" + appId + "/jobs/yarn-cancel";
         String res = restUtil.getForString(url);
-        log.info("[cancelJobByAppId]请求参数结果: res：{}", res);
+        log.info("[cancelJobByAppId]请求结果: res：{}", res);
     }
 
 
@@ -150,7 +151,7 @@ public class YarnRpcServiceImpl implements IYarnRpcService {
 
         String url = getYarnRmHttpAddress() + "/proxy/" + appId + "/jobs/" + jobId + "/checkpoints";
         String res = restUtil.getForString(url);
-        log.info("[getSavepointPath]请求参数结果: res：{}", res);
+        log.info("[getSavepointPath]请求结果: res：{}", res);
         if (StringUtils.isEmpty(res)) {
             return null;
         }
@@ -162,20 +163,20 @@ public class YarnRpcServiceImpl implements IYarnRpcService {
             }
             return (String) savepoint.get("external_path");
         } catch (Exception e) {
-            log.error("json 异常 res={}", res, e);
+            log.error("json解析异常{}", res, e);
         }
         return null;
     }
 
     private void check(YarnAppInfo yarnAppInfo, String queueName, String jobName, String url) {
         if (yarnAppInfo == null) {
-            throw new CustomException("yarn队列" + queueName + "中没有找到运行的任务 name：" + jobName);
+            throw new CustomException("yarn队列[" + queueName + "]中没有找到运行的任务：" + jobName);
         }
         if (yarnAppInfo.getApps() == null) {
-            throw new CustomException("yarn队列" + queueName + "中没有找到运行的任务 name：" + jobName);
+            throw new CustomException("yarn队列[" + queueName + "]中没有找到运行的任务：" + jobName);
         }
         if (yarnAppInfo.getApps().getApp() == null || yarnAppInfo.getApps().getApp().size() <= 0) {
-            throw new CustomException("yarn队列" + queueName + "中没有找到运行的任务 name：" + jobName);
+            throw new CustomException("yarn队列[" + queueName + "]中没有找到运行的任务：" + jobName);
         }
     }
 }

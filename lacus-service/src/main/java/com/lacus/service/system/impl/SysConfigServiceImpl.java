@@ -12,8 +12,7 @@ import org.springframework.stereotype.Service;
  * 参数配置表 服务实现类
  */
 @Service
-public class SysConfigServiceImpl extends ServiceImpl<SysConfigMapper, SysConfigEntity> implements
-        ISysConfigService {
+public class SysConfigServiceImpl extends ServiceImpl<SysConfigMapper, SysConfigEntity> implements ISysConfigService {
 
     @Override
     public String getConfigValueByKey(String key) {

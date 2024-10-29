@@ -4,8 +4,6 @@ import com.alibaba.fastjson2.JSON;
 import com.lacus.common.exception.ApiException;
 import com.lacus.common.exception.CustomException;
 import com.lacus.common.exception.error.ErrorCode;
-import com.lacus.utils.yarn.FlinkParams;
-import com.lacus.utils.yarn.YarnUtil;
 import com.lacus.dao.datasync.entity.DataSyncJobEntity;
 import com.lacus.dao.datasync.entity.DataSyncJobInstanceEntity;
 import com.lacus.dao.datasync.enums.FlinkStatusEnum;
@@ -14,13 +12,20 @@ import com.lacus.domain.common.utils.JobUtil;
 import com.lacus.domain.datasync.instance.JobInstanceService;
 import com.lacus.service.datasync.IDataSyncJobInstanceService;
 import com.lacus.service.datasync.IDataSyncJobService;
+import com.lacus.utils.PropertyUtils;
+import com.lacus.utils.yarn.FlinkParams;
+import com.lacus.utils.yarn.YarnUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.ObjectUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.util.Objects;
+
+import static com.lacus.common.constant.Constants.FLINK_HDFS_COLLECTOR_JAR_NAME;
+import static com.lacus.common.constant.Constants.FLINK_HDFS_COLLECTOR_LIB_PATH;
+import static com.lacus.common.constant.Constants.FLINK_HDFS_COLLECTOR_CONF_PATH;
+import static com.lacus.common.constant.Constants.FLINK_HDFS_DIST_JAR_PATH;
 
 @Slf4j
 @Service
@@ -42,21 +47,6 @@ public class JobOperationService {
     private JobUtil jobUtil;
 
     private static final String JOB_MAIN_CLASS = "com.lacus.app.DataCollectApp";
-
-    @Value("${flink.jar-name}")
-    private String flinkJobJarName;
-
-    @Value("${flink.conf-path}")
-    private String flinkConfPath;
-
-    @Value("${hdfs.defaultFS}")
-    private String defaultHdfs;
-
-    @Value("${flink.lib-path}")
-    private String flinkLibs;
-
-    @Value("${flink.dist-jar-path}")
-    private String flinkDistJar;
 
     /**
      * 启动任务
@@ -85,17 +75,16 @@ public class JobOperationService {
         try {
             DataSyncJobInstanceEntity instance = instanceService.saveInstance(job, syncType, timeStamp, JSON.toJSONString(jobConf));
             jobConf.getJobInfo().setInstanceId(instance.getInstanceId());
-            String flinkJobPath = jobUtil.getJobJarPath(flinkJobJarName, defaultHdfs);
+            String flinkJobPath = jobUtil.getJobJarPath(PropertyUtils.getString(FLINK_HDFS_COLLECTOR_JAR_NAME));
             String applicationId = YarnUtil.deployOnYarn(JOB_MAIN_CLASS,
                     new String[]{sourceType, sinkType, jobName, JSON.toJSONString(jobConf)},
                     jobName,
                     flinkParams,
                     flinkJobPath,
-                    flinkConfPath,
+                    PropertyUtils.getString(FLINK_HDFS_COLLECTOR_CONF_PATH),
                     jobConf.getSource().getSavePoints(),
-                    defaultHdfs,
-                    flinkLibs,
-                    flinkDistJar);
+                    PropertyUtils.getString(FLINK_HDFS_COLLECTOR_LIB_PATH),
+                    PropertyUtils.getString(FLINK_HDFS_DIST_JAR_PATH));
 
             if (Objects.nonNull(applicationId)) {
                 instanceService.updateInstance(instance, applicationId);
@@ -139,7 +128,7 @@ public class JobOperationService {
             try {
                 for (int i = 0; i < 5; i++) {
                     // 停止flink任务
-                    YarnUtil.cancelYarnJob(applicationId, flinkJobId, flinkConfPath, defaultHdfs);
+                    YarnUtil.cancelYarnJob(applicationId, flinkJobId, PropertyUtils.getString(FLINK_HDFS_COLLECTOR_CONF_PATH));
                 }
                 // 修改任务状态
                 jobUtil.updateStopStatusForInstance(instance);

@@ -5,37 +5,69 @@ import com.lacus.common.core.page.PageDTO;
 import com.lacus.common.exception.ApiException;
 import com.lacus.common.exception.CustomException;
 import com.lacus.common.exception.error.ErrorCode;
-import com.lacus.utils.time.DateUtils;
-import com.lacus.utils.yarn.ApplicationModel;
-import com.lacus.utils.yarn.FlinkJobDetail;
-import com.lacus.dao.datasync.entity.*;
+import com.lacus.dao.datasync.entity.DataSyncColumnMappingEntity;
+import com.lacus.dao.datasync.entity.DataSyncJobCatalogEntity;
+import com.lacus.dao.datasync.entity.DataSyncJobEntity;
+import com.lacus.dao.datasync.entity.DataSyncJobInstanceEntity;
+import com.lacus.dao.datasync.entity.DataSyncSavedColumn;
+import com.lacus.dao.datasync.entity.DataSyncSavedTable;
+import com.lacus.dao.datasync.entity.DataSyncSinkColumnEntity;
+import com.lacus.dao.datasync.entity.DataSyncSinkTableEntity;
+import com.lacus.dao.datasync.entity.DataSyncSourceColumnEntity;
+import com.lacus.dao.datasync.entity.DataSyncSourceTableEntity;
+import com.lacus.dao.datasync.entity.DataSyncTableMappingEntity;
 import com.lacus.dao.datasync.enums.FlinkStatusEnum;
 import com.lacus.dao.metadata.entity.MetaColumnEntity;
 import com.lacus.dao.metadata.entity.MetaDatasourceEntity;
 import com.lacus.dao.metadata.entity.MetaDbTableEntity;
 import com.lacus.domain.datasync.job.command.AddJobCommand;
 import com.lacus.domain.datasync.job.command.UpdateJobCommand;
-import com.lacus.domain.datasync.job.dto.*;
+import com.lacus.domain.datasync.job.dto.ColumnDTO;
+import com.lacus.domain.datasync.job.dto.JobDTO;
+import com.lacus.domain.datasync.job.dto.MappedColumnDTO;
+import com.lacus.domain.datasync.job.dto.MappedTableDTO;
+import com.lacus.domain.datasync.job.dto.TableDTO;
+import com.lacus.domain.datasync.job.dto.TableMapping;
 import com.lacus.domain.datasync.job.model.DataSyncJobModel;
 import com.lacus.domain.datasync.job.model.DataSyncJobModelFactory;
 import com.lacus.domain.datasync.job.query.JobPageQuery;
 import com.lacus.domain.datasync.job.query.MappedColumnQuery;
 import com.lacus.domain.datasync.job.query.MappedTableColumnQuery;
 import com.lacus.domain.datasync.job.query.MappedTableQuery;
-import com.lacus.service.datasync.*;
+import com.lacus.service.datasync.IDataSyncColumnMappingService;
+import com.lacus.service.datasync.IDataSyncJobCatalogService;
+import com.lacus.service.datasync.IDataSyncJobInstanceService;
+import com.lacus.service.datasync.IDataSyncJobService;
+import com.lacus.service.datasync.IDataSyncSinkColumnService;
+import com.lacus.service.datasync.IDataSyncSinkTableService;
+import com.lacus.service.datasync.IDataSyncSourceColumnService;
+import com.lacus.service.datasync.IDataSyncSourceTableService;
+import com.lacus.service.datasync.IDataSyncTableMappingService;
 import com.lacus.service.metadata.IMetaColumnService;
 import com.lacus.service.metadata.IMetaDataSourceService;
 import com.lacus.service.metadata.IMetaTableService;
+import com.lacus.utils.PropertyUtils;
+import com.lacus.utils.time.DateUtils;
+import com.lacus.utils.yarn.ApplicationModel;
+import com.lacus.utils.yarn.FlinkJobDetail;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.ObjectUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 import java.util.stream.Collectors;
+
+import static com.lacus.common.constant.Constants.DEFAULT_HDFS_CONFIG;
+import static com.lacus.common.constant.Constants.YARN_RESTAPI_ADDRESS;
 
 @Service
 public class JobDefinitionService {
@@ -78,12 +110,6 @@ public class JobDefinitionService {
 
     @Autowired
     private JobMonitorService monitorService;
-
-    @Value("${yarn.restapi-address}")
-    private String flinkRestPrefix;
-
-    @Value("${hdfs.defaultFS}")
-    private String defaultHdfs;
 
     @SuppressWarnings({"unchecked", "rawtypes"})
     public PageDTO pageList(JobPageQuery query) {
@@ -744,12 +770,12 @@ public class JobDefinitionService {
         ApplicationModel applicationModel = new ApplicationModel();
         if (FlinkStatusEnum.isRunning(instance.getStatus())) {
             FlinkJobDetail jobDetail = monitorService.flinkJobDetail(instance.getApplicationId());
-            applicationModel = monitorService.yarnJobDetail(defaultHdfs, instance.getApplicationId());
+            applicationModel = monitorService.yarnJobDetail(PropertyUtils.getString(DEFAULT_HDFS_CONFIG), instance.getApplicationId());
             applicationModel.setDuration(DateUtils.convertNumber2DateString(jobDetail.getDuration()));
         } else {
             applicationModel.setApplicationId(instance.getApplicationId());
             applicationModel.setStartTime(DateUtils.getDatetimeStr(instance.getSubmitTime()));
-            applicationModel.setTrackingUrl(flinkRestPrefix + instance.getApplicationId());
+            applicationModel.setTrackingUrl(PropertyUtils.getString(YARN_RESTAPI_ADDRESS) + instance.getApplicationId());
         }
         applicationModel.setFlinkStatus(FlinkStatusEnum.getName(instance.getStatus()));
         return applicationModel;

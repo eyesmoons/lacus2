@@ -6,20 +6,25 @@ import com.lacus.enums.FlinkJobTypeEnum;
 import com.lacus.enums.FlinkStatusEnum;
 import com.lacus.service.flink.model.JobRunParamDTO;
 import com.lacus.service.flink.model.StandaloneFlinkJobInfo;
-import com.lacus.utils.CommonThreadPoolUtil;
+import com.lacus.utils.JobExecuteThreadPoolUtil;
+import com.lacus.utils.PropertyUtils;
 import com.lacus.utils.file.FileUtil;
+import com.lacus.utils.hdfs.HdfsUtil;
 import com.lacus.utils.yarn.YarnUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.Objects;
 import java.util.Properties;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import static com.lacus.common.constant.Constants.FLINK_JOB_EXECUTE_HOME;
 import static com.lacus.enums.DeployModeEnum.YARN_APPLICATION;
 import static com.lacus.enums.DeployModeEnum.YARN_PER;
 
@@ -27,7 +32,7 @@ import static com.lacus.enums.DeployModeEnum.YARN_PER;
 @Slf4j
 public class FlinkJobBaseService {
 
-    public static final ThreadLocal<String> THREADAPPID = new ThreadLocal<String>();
+    public static final ThreadLocal<String> APPID_THREAD_LOCAL = new ThreadLocal<String>();
 
     @Autowired
     private IYarnRpcService IYarnRpcService;
@@ -69,18 +74,18 @@ public class FlinkJobBaseService {
 
     public JobRunParamDTO writeSqlToFile(FlinkJobEntity flinkJobEntity) {
         String fileName = "flink_sql_job_" + flinkJobEntity.getJobId() + ".sql";
-        String sqlPath = System.getenv("APP_HOME") + "/" + fileName;
+        String sqlPath = PropertyUtils.getString(FLINK_JOB_EXECUTE_HOME) + fileName;
         FileUtil.writeContent2File(flinkJobEntity.getFlinkSql(), sqlPath);
         return JobRunParamDTO.buildJobRunParam(flinkJobEntity, sqlPath);
     }
 
     public void aSyncExecJob(JobRunParamDTO jobRunParamDTO, FlinkJobEntity flinkJobEntity, String savepointPath) {
-        ThreadPoolExecutor threadPoolExecutor = CommonThreadPoolUtil.getInstance().getThreadPoolExecutor();
+        ThreadPoolExecutor threadPoolExecutor = JobExecuteThreadPoolUtil.getInstance().getThreadPoolExecutor();
         threadPoolExecutor.execute(new Runnable() {
             @Override
             public void run() {
                 String appId = "";
-                THREADAPPID.set(appId);
+                APPID_THREAD_LOCAL.set(appId);
                 try {
                     String command = "";
                     // 如果是自定义提交jar模式下载文件到本地
@@ -92,12 +97,12 @@ public class FlinkJobBaseService {
                             command = commandService.buildRunCommandForYarnCluster(jobRunParamDTO, flinkJobEntity, savepointPath);
                             //2、提交任务
                             appId = this.submitJobForYarn(command, flinkJobEntity);
-                            THREADAPPID.set(appId);
+                            APPID_THREAD_LOCAL.set(appId);
                             break;
                         case LOCAL:
                         case STANDALONE:
                             String address = flinkRpcService.getFlinkHttpAddress(flinkJobEntity.getDeployMode());
-                            log.info("flink 远程提交地址是 address={}", address);
+                            log.info("flink 提交地址：{}", address);
                             //1、构建执行命令
                             command = commandService.buildRunCommandForCluster(jobRunParamDTO, flinkJobEntity, savepointPath, address);
                             //2、提交任务
@@ -109,8 +114,8 @@ public class FlinkJobBaseService {
                 } catch (Exception e) {
                     log.error("任务[{}]执行异常！", flinkJobEntity.getJobId(), e);
                 } finally {
-                    if (StringUtils.isBlank(appId)) { // 解决任务异常，但已经生成了appID，但没有传递给上层调用方法的问题
-                        appId = THREADAPPID.get();
+                    if (StringUtils.isBlank(appId)) { // 解决任务异常，但已经生成了appId，但没有传递给上层调用方法的问题
+                        appId = APPID_THREAD_LOCAL.get();
                         log.info("任务[{}]执行异常, appid: {}", flinkJobEntity.getJobId(), appId);
                     }
                     flinkJobService.updateStatus(flinkJobEntity.getJobId(), FlinkStatusEnum.FAILED);
@@ -122,9 +127,15 @@ public class FlinkJobBaseService {
              */
             private void downJar(JobRunParamDTO jobRunParamDTO, FlinkJobEntity flinkJobEntity) {
                 if (Objects.equals(FlinkJobTypeEnum.FLINK_JAR, flinkJobEntity.getJobType())) {
-                    String localJarPath = "";
-                    // TODO 从hdfs下载jar包
-                    jobRunParamDTO.setMainJarPath(localJarPath);
+                    String mainJarPath = flinkJobEntity.getMainJarPath();
+                    String mainJarName = new File(mainJarPath).getName();
+                    String localJarPath = PropertyUtils.getString(FLINK_JOB_EXECUTE_HOME) + "/download/" + flinkJobEntity.getJobId() + File.separator;
+                    try {
+                        HdfsUtil.copyFileFromHdfs(mainJarPath, localJarPath);
+                        jobRunParamDTO.setMainJarPath(localJarPath + mainJarName);
+                    } catch (IOException e) {
+                        throw new CustomException("下载hdfs文件出错：" + e.getMessage());
+                    }
                 }
             }
 
@@ -159,8 +170,7 @@ public class FlinkJobBaseService {
             }
             String appId = IYarnRpcService.getAppIdByYarn(flinkJobEntity.getJobName(), queueName);
             if (StringUtils.isNotEmpty(appId)) {
-                throw new CustomException("该任务在yarn上有运行，请到集群上取消任务后再运行 任务名称是:"
-                        + flinkJobEntity.getJobName() + " 队列名称是:" + queueName);
+                throw new CustomException("该任务处于运行状态，任务名称:" + flinkJobEntity.getJobName() + " 队列名称:" + queueName);
             }
         } catch (CustomException e) {
             throw e;
@@ -170,11 +180,11 @@ public class FlinkJobBaseService {
     }
 
     /**
-     * 正则表达式，区配参数：${xxxx}
+     * 正则表达式，区配参数：${x}
      */
     private static final Pattern PARAM_PATTERN = Pattern.compile("\\$\\{[\\w.-]+\\}");
 
-    private String replaceParamter(Properties properties, String text) {
+    private String replaceParameter(Properties properties, String text) {
         if (text == null) {
             return null;
         }

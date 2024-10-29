@@ -6,21 +6,33 @@ import com.alibaba.fastjson2.JSONObject;
 import com.google.common.collect.Lists;
 import com.lacus.common.exception.ApiException;
 import com.lacus.common.exception.error.ErrorCode;
+import com.lacus.utils.PropertyUtils;
 import com.lacus.utils.RestUtil;
 import com.lacus.utils.kafka.KafkaUtil;
 import com.lacus.utils.time.DateUtils;
-import com.lacus.utils.yarn.*;
+import com.lacus.utils.yarn.ApplicationModel;
+import com.lacus.utils.yarn.ConfigUtil;
+import com.lacus.utils.yarn.FlinkJobDetail;
+import com.lacus.utils.yarn.YarnMetrics;
+import com.lacus.utils.yarn.YarnUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.hadoop.yarn.conf.YarnConfiguration;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 import java.text.DecimalFormat;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+
+import static com.lacus.common.constant.Constants.FLINK_HDFS_COLLECTOR_CONF_PATH;
+import static com.lacus.common.constant.Constants.YARN_NODE_ADDRESS;
+import static com.lacus.common.constant.Constants.YARN_RESTAPI_ADDRESS;
 
 @Slf4j
 @Service("monitorService")
@@ -29,36 +41,23 @@ public class JobMonitorService {
     @Autowired
     private RestUtil restUtil;
 
-    @Value("${flink.conf-path}")
-    private String yarnConf;
-
-    @Value("${yarn.restapi-address}")
-    private String flinkRestPrefix;
-
-    @Value("${yarn.node-address}")
-    private String yarnNode;
-
-    @Value("${hdfs.defaultFS}")
-    private String defaultHdfs;
-
-    @Value("${hdfs.username}")
-    private String hadoopUserName;
-
     private final static String appType = "Apache Flink";
 
+    private final String flinkRestPrefix = PropertyUtils.getString(YARN_RESTAPI_ADDRESS);
+
     public List<ApplicationModel> listFlinkJob() {
-        return YarnUtil.listYarnRunningJob(yarnConf, appType, defaultHdfs);
+        return YarnUtil.listYarnRunningJob(PropertyUtils.getString(FLINK_HDFS_COLLECTOR_CONF_PATH), appType);
     }
 
     public YarnMetrics clusterDetail() {
         YarnConfiguration conf = new YarnConfiguration();
-        ConfigUtil.initConfig(conf, yarnConf, defaultHdfs);
+        ConfigUtil.initConfig(conf, PropertyUtils.getString(FLINK_HDFS_COLLECTOR_CONF_PATH));
         String host = conf.get("yarn.resourcemanager.webapp.address");
         JSONObject json = restUtil.getForJsonObject("http://" + host + "/ws/v1/cluster/metrics");
-        log.debug("rest返回信息:{}", JSON.toJSONString(json));
+        log.debug("返回信息:{}", JSON.toJSONString(json));
         YarnMetrics yarnMetrics = json.getJSONObject("clusterMetrics").toJavaObject(YarnMetrics.class);
 
-        yarnMetrics.setYarnNode(yarnNode);
+        yarnMetrics.setYarnNode(PropertyUtils.getString(YARN_NODE_ADDRESS));
         yarnMetrics.setTotalGB(yarnMetrics.getTotalMB() / 1024);
         yarnMetrics.setAllocatedGB(yarnMetrics.getAllocatedMB() / 1024);
         yarnMetrics.setAvailableGB(yarnMetrics.getAvailableMB() / 1024);
@@ -70,8 +69,8 @@ public class JobMonitorService {
         return yarnMetrics;
     }
 
-    public ApplicationModel yarnJobDetail(String defaultHdfs, String appId) {
-        return YarnUtil.yarnJobDetail(yarnConf, appId, defaultHdfs);
+    public ApplicationModel yarnJobDetail(String appId) {
+        return YarnUtil.yarnJobDetail(PropertyUtils.getString(FLINK_HDFS_COLLECTOR_CONF_PATH), appId);
     }
 
     public Object flinkJobOverview(String applicationId) {

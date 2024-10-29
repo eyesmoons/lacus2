@@ -6,6 +6,7 @@ import com.lacus.enums.DeployModeEnum;
 import com.lacus.service.flink.FlinkJobBaseService;
 import com.lacus.service.flink.ICommandRpcClientService;
 import com.lacus.service.flink.ICommandService;
+import com.lacus.utils.PropertyUtils;
 import com.lacus.utils.WaitForPoolConfigUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -17,6 +18,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
+
+import static com.lacus.common.constant.Constants.FLINK_CLIENT_HOME;
 
 @Slf4j
 @Service
@@ -42,14 +45,14 @@ public class CommandRpcClientServiceImpl implements ICommandRpcClientService {
 
     @Override
     public void savepointForPerYarn(String jobId, String targetDirectory, String yarnAppId) throws Exception {
-        String command = commandService.buildSavepointCommandForYarn(jobId, targetDirectory, yarnAppId, System.getenv("FLINK_HOME"));
+        String command = commandService.buildSavepointCommandForYarn(jobId, targetDirectory, yarnAppId, PropertyUtils.getString(FLINK_CLIENT_HOME));
         log.info("[savepointForPerYarn] command={}", command);
         this.execSavepoint(command);
     }
 
     @Override
     public void savepointForPerCluster(String jobId, String targetDirectory) throws Exception {
-        String command = commandService.buildSavepointCommandForCluster(jobId, targetDirectory, System.getenv("FLINK_HOME"));
+        String command = commandService.buildSavepointCommandForCluster(jobId, targetDirectory, PropertyUtils.getString(FLINK_CLIENT_HOME));
         log.info("[savepointForPerCluster] command：{}", command);
         this.execSavepoint(command);
     }
@@ -97,8 +100,7 @@ public class CommandRpcClientServiceImpl implements ICommandRpcClientService {
         String appId = null;
         BufferedReader reader = null;
         try {
-            long lastTime = System.currentTimeMillis();
-            String result = null;
+            String result;
             reader = new BufferedReader(new InputStreamReader(stream, StandardCharsets.UTF_8));
             //按行读取
             while ((result = reader.readLine()) != null) {
@@ -123,8 +125,7 @@ public class CommandRpcClientServiceImpl implements ICommandRpcClientService {
                     throw new RuntimeException("解析appId异常");
                 }
             }
-            FlinkJobBaseService.THREADAPPID.set(appId);
-
+            FlinkJobBaseService.APPID_THREAD_LOCAL.set(appId);
             log.info("获取到的appId是 {}", appId);
             return appId;
         } catch (CustomException e) {
@@ -136,7 +137,6 @@ public class CommandRpcClientServiceImpl implements ICommandRpcClientService {
             this.close(reader, stream, "clearInfoLogStream");
         }
     }
-
 
     /**
      * 关闭流

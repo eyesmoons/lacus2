@@ -2,8 +2,6 @@ package com.lacus.domain.datasync.instance;
 
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.lacus.common.core.page.PageDTO;
-import com.lacus.utils.time.DateUtils;
-import com.lacus.utils.yarn.FlinkJobDetail;
 import com.lacus.dao.datasync.entity.DataSyncJobEntity;
 import com.lacus.dao.datasync.entity.DataSyncJobInstanceEntity;
 import com.lacus.dao.datasync.enums.FlinkStatusEnum;
@@ -13,9 +11,11 @@ import com.lacus.domain.datasync.instance.query.JobInstancePageQuery;
 import com.lacus.domain.datasync.job.JobMonitorService;
 import com.lacus.service.datasync.IDataSyncJobInstanceService;
 import com.lacus.service.datasync.IDataSyncJobService;
+import com.lacus.utils.PropertyUtils;
+import com.lacus.utils.time.DateUtils;
+import com.lacus.utils.yarn.FlinkJobDetail;
 import org.apache.commons.lang3.ObjectUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.util.Date;
@@ -24,6 +24,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
+
+import static com.lacus.common.constant.Constants.YARN_RESTAPI_ADDRESS;
 
 /**
  * @created by shengyu on 2024/2/26 21:32
@@ -43,9 +45,6 @@ public class JobInstanceService {
 
     @Autowired
     private JobUtil jobUtil;
-
-    @Value("${yarn.restapi-address}")
-    private String flinkRestPrefix;
 
     public void updateInstance(DataSyncJobInstanceEntity instance, String applicationId) {
         try {
@@ -96,7 +95,7 @@ public class JobInstanceService {
             DataSyncJobInstanceModel model = new DataSyncJobInstanceModel(entity);
             model.setJobName(finalJobMap.get(entity.getJobId()));
             if (Objects.equals(FlinkStatusEnum.RUNNING.getStatus(), entity.getStatus())) {
-                model.setTrackingUrl(flinkRestPrefix + entity.getApplicationId() + "/#/overview");
+                model.setTrackingUrl(PropertyUtils.getString(YARN_RESTAPI_ADDRESS) + entity.getApplicationId() + "/#/overview");
             }
             return model;
         }).collect(Collectors.toList());

@@ -6,8 +6,10 @@ import com.lacus.common.config.ImmutablePriorityPropertyDelegate;
 import lombok.experimental.UtilityClass;
 import lombok.extern.slf4j.Slf4j;
 
+import java.io.ByteArrayInputStream;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Properties;
 import java.util.Set;
 import java.util.function.Function;
 
@@ -31,6 +33,17 @@ public class PropertyUtils {
     public static String getUpperCaseString(String key) {
         String val = getString(key);
         return Strings.isNullOrEmpty(val) ? val : val.toUpperCase();
+    }
+
+    public static Properties loadPropertiesByStr(String str) {
+        Properties props = new Properties();
+        try {
+            ByteArrayInputStream inputStream = new ByteArrayInputStream(str.getBytes());
+            props.load(inputStream);
+        } catch (Exception e) {
+            throw new RuntimeException(e.getMessage());
+        }
+        return props;
     }
 
     public static Integer getInt(String key) {

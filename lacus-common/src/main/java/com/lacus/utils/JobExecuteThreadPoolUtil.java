@@ -8,7 +8,7 @@ import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
 @Slf4j
-public final class CommonThreadPoolUtil {
+public final class JobExecuteThreadPoolUtil {
 
     private static final int corePoolSize = 10;
 
@@ -18,19 +18,18 @@ public final class CommonThreadPoolUtil {
 
     private static ThreadPoolExecutor threadPoolExecutor;
 
-    private static CommonThreadPoolUtil asyncThreadPool;
+    private static JobExecuteThreadPoolUtil asyncThreadPool;
 
-    private CommonThreadPoolUtil() {
+    private JobExecuteThreadPoolUtil() {
         BlockingQueue<Runnable> workQueue = new ArrayBlockingQueue<>(200, true);
-        threadPoolExecutor = new ThreadPoolExecutor(corePoolSize, maximumPoolSize, keepAliveTime,
-                TimeUnit.MINUTES, workQueue);
+        threadPoolExecutor = new ThreadPoolExecutor(corePoolSize, maximumPoolSize, keepAliveTime, TimeUnit.MINUTES, workQueue);
     }
 
-    public static synchronized CommonThreadPoolUtil getInstance() {
+    public static synchronized JobExecuteThreadPoolUtil getInstance() {
         if (null == asyncThreadPool) {
-            synchronized (CommonThreadPoolUtil.class) {
+            synchronized (JobExecuteThreadPoolUtil.class) {
                 if (null == asyncThreadPool) {
-                    asyncThreadPool = new CommonThreadPoolUtil();
+                    asyncThreadPool = new JobExecuteThreadPoolUtil();
                 }
             }
         }

@@ -18,24 +18,6 @@ lacus:
   # 是否检查 i18n 资源文件（messages.properties）是否都有对应的键值对
   checkI18nKey: false
 
-## 开发环境配置
-#server:
-#  # 服务器的HTTP端口，默认为8080
-#  port: 8080
-#  servlet:
-#    # 应用的访问路径
-#    context-path: /
-#  tomcat:
-#    # tomcat的URI编码
-#    uri-encoding: UTF-8
-#    # 连接数满后的排队数，默认为100
-#    accept-count: 1000
-#    threads:
-#      # tomcat最大线程数，默认为200
-#      max: 800
-#      # Tomcat启动初始化的线程数，默认值10
-#      min-spare: 100
-
 # 日志配置
 logging:
   level:
@@ -75,12 +57,11 @@ spring:
       write-dates-as-timestamps: false
     date-format: yyyy-MM-dd HH:mm:ss
 
-
 # token配置
 token:
   # 令牌自定义标识
   header: Authorization
-  # 令牌密钥 TODO 记得更换
+  # 令牌密钥
   secret: sdhfkjshBN6rr32df38
   # 令牌有效期（默认30分钟）
   expireTime: 30
@@ -101,7 +82,6 @@ mybatis-plus:
     logImpl: org.apache.ibatis.logging.slf4j.Slf4jImpl
   global-config:
     refresh: true
-
 
 # PageHelper分页插件
 pagehelper:
@@ -124,21 +104,3 @@ xss:
   excludes: /system/notice
   # 匹配链接
   urlPatterns: /system/*,/monitor/*,/tool/*
-
-kafka:
-  bootstrapServers: 123.99.199.177:9092,123.99.199.215:9092,123.99.199.226:9092
-
-yarn:
-  restapi-address: http://hadoop2:8088/proxy/
-  node-address: http://hadoop2:8088/cluster/nodes
-
-flink:
-  conf-path: /flink/conf/
-  job-jars-path: /flink/jobs/
-  jar-name: flink-jobs.jar
-  lib-path: /flink/libs
-  dist-jar-path: /flink/libs/flink-dist-1.16.2.jar
-
-hdfs:
-  defaultFS: hdfs://hadoop1:9000
-  username: hdfs

@@ -46,11 +46,11 @@ import java.util.stream.Stream;
 
 import static com.lacus.common.constant.Constants.COLON;
 import static com.lacus.common.constant.Constants.COMMA;
+import static com.lacus.common.constant.Constants.DEFAULT_HDFS_CONFIG;
 import static com.lacus.common.constant.Constants.DOUBLE_SLASH;
 import static com.lacus.common.constant.Constants.EMPTY_STRING;
 import static com.lacus.common.constant.Constants.FOLDER_SEPARATOR;
 import static com.lacus.common.constant.Constants.FORMAT_S_S;
-import static com.lacus.common.constant.Constants.FS_DEFAULT_FS;
 import static com.lacus.common.constant.Constants.HADOOP_RM_STATE_ACTIVE;
 import static com.lacus.common.constant.Constants.HDFS_DEFAULT_FS;
 import static com.lacus.common.constant.Constants.RESOURCE_TYPE_FILE;
@@ -114,13 +114,13 @@ public class HdfsIStorageOperator implements Closeable, IStorageOperate {
                 configuration.set(HDFS_DEFAULT_FS, defaultFS);
                 fsRelatedProps.forEach((key, value) -> configuration.set(key, value));
             } else {
-                log.error("property:{} can not to be empty, please set!", FS_DEFAULT_FS);
+                log.error("property:{} can not to be empty, please set!", DEFAULT_HDFS_CONFIG);
                 throw new NullPointerException(
-                        String.format("property: %s can not to be empty, please set!", FS_DEFAULT_FS));
+                        String.format("property: %s can not to be empty, please set!", DEFAULT_HDFS_CONFIG));
             }
 
             if (!defaultFS.startsWith("file")) {
-                log.info("get property:{} -> {}, from core-site.xml hdfs-site.xml ", FS_DEFAULT_FS,
+                log.info("get property:{} -> {}, from core-site.xml hdfs-site.xml ", DEFAULT_HDFS_CONFIG,
                         defaultFS);
             }
 

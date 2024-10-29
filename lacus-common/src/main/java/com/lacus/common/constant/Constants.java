@@ -45,9 +45,8 @@ public class Constants {
         public static final String UPLOAD_PATH = "upload";
     }
 
-    public static final String DEFAULT_HDFS = "hdfs.defaultFS";
-    public static final String HADOOP_USER_NAME = "HADOOP_USER_NAME";
-    public static final String HADOOP_USER = "hdfs";
+    public static final String DEFAULT_HDFS_CONFIG = "hdfs.defaultFS";
+    public static final String HADOOP_USER_CONFIG = "HADOOP_USER_NAME";
     public static final String HDFS_SITE_XML = "hdfs-site.xml";
     public static final String CORE_SITE_XML = "core-site.xml";
     public static final String YARN_SITE_XML = "yarn-site.xml";
@@ -60,12 +59,14 @@ public class Constants {
     public static final String RESOURCE_TYPE_FILE = "resources";
     public static final String RESOURCE_TYPE_UDF = "udfs";
     public static final String EMPTY_STRING = "";
-    public static final String FS_DEFAULT_FS = "resource.hdfs.fs.defaultFS";
-    public static final String HADOOP_RESOURCE_MANAGER_HTTPADDRESS_PORT = "resource.manager.httpaddress.port";
+    public static final String KAFKA_SERVERS = "kafka.bootstrapServers";
+    public static final String HADOOP_RESOURCE_MANAGER_HTTPADDRESS_PORT = "yarn.resource.manager.httpaddress.port";
     public static final String YARN_RESOURCEMANAGER_HA_RM_IDS = "yarn.resourcemanager.ha.rm.ids";
     public static final String YARN_APPLICATION_STATUS_ADDRESS = "yarn.application.status.address";
     public static final String YARN_JOB_HISTORY_STATUS_ADDRESS = "yarn.job.history.status.address";
-    public static final String HDFS_ROOT_USER = "resource.hdfs.root.user";
+    public static final String YARN_RESTAPI_ADDRESS = "yarn.restapi-address";
+    public static final String YARN_NODE_ADDRESS = "yarn.node-address";
+    public static final String HADOOP_USER = "hadoop.username";
     public static final String RESOURCE_UPLOAD_PATH = "resource.storage.upload.base.path";
     public static final String DATA_BASEDIR_PATH = "data.basedir.path";
     public static final String RESOURCE_VIEW_SUFFIXES = "resource.view.suffixs";
@@ -101,8 +102,15 @@ public class Constants {
     public static final String FLINK_HTTP_ADDRESS = "flink.rest.http.address";
     // flink Rest web HA 地址(Standalone Cluster模式 支持HA 可以填写多个地址,用;分隔)
     public static final String FLINK_REST_HA_HTTP_ADDRESS = "flink.rest.ha.http.address";
-    public static final String JARVERSION = "lib/flink-streaming-core-1.5.0.RELEASE.jar";
-    public static final String YARN_RM_HTTP_ADDRESS = "yarn.rm.http.address";
-    public static final String DEFAULT_SAVEPOINT_PATH = "hdfs:///flink/savepoint/lacus/";
-
+    public static final String FLINK_STREAMING_JARVERSION = "flink.streaming.jarversion";
+    public static final String FLINK_DEFAULT_SAVEPOINT_PATH = "flink.default.savepoint.path";
+    public static final String FLINK_DEFAULT_CHECKPOINT_PATH = "flink.default.checkpoint.path";
+    public static final String FLINK_HDFS_COLLECTOR_CONF_PATH = "flink.hdfs.collector.conf-path";
+    public static final String FLINK_HDFS_COLLECTOR_JOB_JARS_PATH = "flink.hdfs.collector.job-jars-path";
+    public static final String FLINK_HDFS_COLLECTOR_JAR_NAME = "flink.hdfs.collector.jar-name";
+    public static final String FLINK_HDFS_COLLECTOR_LIB_PATH = "flink.hdfs.collector.lib-path";
+    public static final String FLINK_HDFS_DIST_JAR_PATH = "flink.hdfs.dist-jar-path";
+    public static final String LACUS_APPLICATION_HOME = "lacus.application.home";
+    public static final String FLINK_CLIENT_HOME = "flink.client.home";
+    public static final String FLINK_JOB_EXECUTE_HOME = "flink.job.execute.home";
 }

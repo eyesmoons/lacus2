@@ -7,13 +7,14 @@ import com.lacus.enums.DeployModeEnum;
 import com.lacus.service.flink.ICommandService;
 import com.lacus.service.flink.model.JobRunParamDTO;
 import com.lacus.service.system.ISysEnvService;
+import com.lacus.utils.PropertyUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import static com.lacus.common.constant.Constants.JARVERSION;
+import static com.lacus.common.constant.Constants.FLINK_STREAMING_JARVERSION;
 
 @Service
 @Slf4j
@@ -60,7 +61,7 @@ public class CommandServiceImpl implements ICommandService {
             case FLINK_SQL_BATCH:
             case FLINK_SQL_STREAMING:
                 command.append(" -c ").append(APP_CLASS_NAME);
-                command.append(" ").append(jobRunParamDTO.getSysHome()).append(JARVERSION);
+                command.append(" ").append(jobRunParamDTO.getSysHome()).append(PropertyUtils.getString(FLINK_STREAMING_JARVERSION));
                 command.append(" -sql ").append(jobRunParamDTO.getSqlPath());
                 if (StringUtils.isNotEmpty(jobRunParamDTO.getFlinkCheckpointConfig())) {
                     command.append(" ").append(jobRunParamDTO.getFlinkCheckpointConfig());
@@ -118,7 +119,7 @@ public class CommandServiceImpl implements ICommandService {
             case FLINK_SQL_STREAMING:
             case FLINK_SQL_BATCH:
                 command.append(" -c ").append(APP_CLASS_NAME);
-                command.append(" ").append(jobRunParamDTO.getSysHome()).append(JARVERSION);
+                command.append(" ").append(jobRunParamDTO.getSysHome()).append(PropertyUtils.getString(FLINK_STREAMING_JARVERSION));
                 command.append(" -sql ").append(jobRunParamDTO.getSqlPath());
                 if (StringUtils.isNotEmpty(jobRunParamDTO.getFlinkCheckpointConfig())) {
                     command.append(" ").append(jobRunParamDTO.getFlinkCheckpointConfig());

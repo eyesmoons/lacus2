@@ -2,8 +2,13 @@ package com.lacus.service.flink.model;
 
 import com.lacus.common.exception.CustomException;
 import com.lacus.dao.flink.entity.FlinkJobEntity;
+import com.lacus.utils.PropertyUtils;
 import lombok.Data;
 import org.apache.commons.lang3.ObjectUtils;
+
+import static com.lacus.common.constant.Constants.FLINK_CLIENT_HOME;
+import static com.lacus.common.constant.Constants.FLINK_DEFAULT_SAVEPOINT_PATH;
+import static com.lacus.common.constant.Constants.LACUS_APPLICATION_HOME;
 
 @Data
 public class JobRunParamDTO {
@@ -51,27 +56,27 @@ public class JobRunParamDTO {
     }
 
     public static JobRunParamDTO buildJobRunParam(FlinkJobEntity flinkJobEntity, String sqlPath) {
-        String flinkHome = System.getenv("FLINK_HOME");
+        String flinkHome = PropertyUtils.getString(FLINK_CLIENT_HOME);
         String flinkBinPath = flinkHome + "/bin/flink";
         String flinkRunParam = flinkJobEntity.getFlinkRunConfig();
-        String flinkCheckpointPath = System.getenv("FLINK_CHECKPOINT_PATH");
-        String sysHome = System.getenv("APP_HOME");
+        String flinkSavepointPath = PropertyUtils.getString(FLINK_DEFAULT_SAVEPOINT_PATH);
+        String appHome = PropertyUtils.getString(LACUS_APPLICATION_HOME);
 
         if (ObjectUtils.isEmpty(flinkHome)) {
             throw new CustomException("请配置环境变量[FLINK_HOME]");
         }
-        if (ObjectUtils.isEmpty(flinkCheckpointPath)) {
+        if (ObjectUtils.isEmpty(flinkSavepointPath)) {
             throw new CustomException("请配置环境变量[FLINK_CHECKPOINT_PATH]");
         }
-        if (ObjectUtils.isEmpty(sysHome)) {
+        if (ObjectUtils.isEmpty(appHome)) {
             throw new CustomException("请配置环境变量[APP_HOME]");
         }
         return new JobRunParamDTO(
                 flinkBinPath,
                 flinkRunParam,
                 sqlPath,
-                sysHome,
-                flinkCheckpointPath
+                appHome,
+                flinkSavepointPath
         );
     }
 }

@@ -22,9 +22,7 @@ public final class WaitForPoolConfigUtil {
 
   private WaitForPoolConfigUtil() {
     BlockingQueue<Runnable> workQueue = new ArrayBlockingQueue<>(100, true);
-    threadPoolExecutor = new ThreadPoolExecutor(corePoolSize, maximumPoolSize, keepAliveTime,
-        TimeUnit.MINUTES,
-        workQueue, new ThreadPoolExecutor.AbortPolicy());
+    threadPoolExecutor = new ThreadPoolExecutor(corePoolSize, maximumPoolSize, keepAliveTime, TimeUnit.MINUTES, workQueue, new ThreadPoolExecutor.AbortPolicy());
   }
 
   public static synchronized WaitForPoolConfigUtil getInstance() {

@@ -14,6 +14,7 @@ import com.lacus.service.flink.IFlinkOperationService;
 import com.lacus.service.flink.IStandaloneRpcService;
 import com.lacus.service.flink.model.JobRunParamDTO;
 import com.lacus.service.flink.model.StandaloneFlinkJobInfo;
+import com.lacus.utils.PropertyUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -22,7 +23,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.Objects;
 
-import static com.lacus.common.constant.Constants.DEFAULT_SAVEPOINT_PATH;
+import static com.lacus.common.constant.Constants.FLINK_DEFAULT_SAVEPOINT_PATH;
 import static com.lacus.common.constant.Constants.STANDALONE_FLINK_OPERATION_SERVER;
 
 /**
@@ -128,7 +129,7 @@ public class StandaloneFlinkOperationServerImpl implements IFlinkOperationServic
         try {
             //yarn模式下和集群模式下统一目录是hdfs:///flink/savepoint/flink-streaming-platform-web/
             //LOCAL模式本地模式下保存在flink根目录下
-            String targetDirectory = DEFAULT_SAVEPOINT_PATH + jobId;
+            String targetDirectory = PropertyUtils.getString(FLINK_DEFAULT_SAVEPOINT_PATH) + jobId;
             if (DeployModeEnum.LOCAL.equals(flinkJobEntity.getDeployMode())) {
                 targetDirectory = "savepoint/" + jobId;
             }

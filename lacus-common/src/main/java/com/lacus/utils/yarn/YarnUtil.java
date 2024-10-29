@@ -3,6 +3,7 @@ package com.lacus.utils.yarn;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import com.lacus.common.constant.Constants;
+import com.lacus.utils.PropertyUtils;
 import com.lacus.utils.hdfs.HdfsUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.cli.ParseException;
@@ -52,6 +53,7 @@ import java.util.Properties;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 
+import static com.lacus.common.constant.Constants.DEFAULT_HDFS_CONFIG;
 import static org.apache.flink.configuration.MemorySize.MemoryUnit.MEGA_BYTES;
 
 @Slf4j
@@ -73,21 +75,20 @@ public class YarnUtil {
                                       String userJarPath,
                                       String flinkConf,
                                       String checkpointUrl,
-                                      String defaultHdfs,
                                       String flinkLibs,
                                       String flinkDistJar) {
         // 获取flink的配置
-        Configuration flinkConfig = getFlinkConf(flinkConf, defaultHdfs);
-        settingLog(flinkConfig, flinkConf, defaultHdfs);
+        Configuration flinkConfig = getFlinkConf(flinkConf);
+        settingLog(flinkConfig, flinkConf);
         // 设置checkpoint模式为增量
         flinkConfig.set(CheckpointingOptions.INCREMENTAL_CHECKPOINTS, true);
         // 设置用户flink项目jar包
         flinkConfig.set(PipelineOptions.JARS, Collections.singletonList(userJarPath));
-        Path remoteLib = new Path(defaultHdfs + flinkLibs);
+        Path remoteLib = new Path(PropertyUtils.getString(DEFAULT_HDFS_CONFIG) + flinkLibs);
         // 设置依赖jar包
         flinkConfig.set(YarnConfigOptions.PROVIDED_LIB_DIRS, Collections.singletonList(remoteLib.toString()));
         // 设置flink jar包
-        flinkConfig.set(YarnConfigOptions.FLINK_DIST_JAR, defaultHdfs + flinkDistJar);
+        flinkConfig.set(YarnConfigOptions.FLINK_DIST_JAR, PropertyUtils.getString(DEFAULT_HDFS_CONFIG) + flinkDistJar);
         //设置为application模式
         flinkConfig.set(DeploymentOptions.TARGET, YarnDeploymentTarget.APPLICATION.getName());
         // yarn application name
@@ -105,7 +106,7 @@ public class YarnUtil {
         // 设置用户flink任务jar的参数和主类
         ApplicationConfiguration appConfig = new ApplicationConfiguration(args, mainClass);
 
-        YarnClusterDescriptor yarnClusterDescriptor = initYarnClusterDescriptor(flinkConfig, flinkConf, defaultHdfs);
+        YarnClusterDescriptor yarnClusterDescriptor = initYarnClusterDescriptor(flinkConfig, flinkConf);
         // 用于提交yarn任务的一些默认参数，比如jobManager内存数、taskManager内存数和slot数量
         ClusterSpecification clusterSpecification = new ClusterSpecification.ClusterSpecificationBuilder()
                 .setMasterMemoryMB(flinkParams.getMasterMemoryMB())
@@ -133,13 +134,14 @@ public class YarnUtil {
     }
 
     /**
+     * 获取yarn上正在运行的任务
+     *
      * @param conf:     yarn配置文件
      * @param appTypes: 任务类型 Apache Flink/MAPREDUCE
-     * @description: 获取yarn上正在运行的任务
      */
-    public static List<ApplicationModel> listYarnRunningJob(String conf, String appTypes, String defaultHdfs) {
+    public static List<ApplicationModel> listYarnRunningJob(String conf, String appTypes) {
         YarnConfiguration yarnConf = new YarnConfiguration();
-        ConfigUtil.initConfig(yarnConf, conf, defaultHdfs);
+        ConfigUtil.initConfig(yarnConf, conf);
         YarnClient yarnClient = YarnClient.createYarnClient();
         yarnClient.init(yarnConf);
         yarnClient.start();
@@ -160,12 +162,13 @@ public class YarnUtil {
     }
 
     /**
+     * 根据applicationId 获取Yarn上配置
+     *
      * @param conf: yarn配置文件
-     * @description: 根据applicationId 获取Yarn上配置
      */
-    public static ApplicationModel yarnJobDetail(String conf, String appId, String defaultHdfs) {
+    public static ApplicationModel yarnJobDetail(String conf, String appId) {
         YarnConfiguration yarnConf = new YarnConfiguration();
-        ConfigUtil.initConfig(yarnConf, conf, defaultHdfs);
+        ConfigUtil.initConfig(yarnConf, conf);
         YarnClient yarnClient = YarnClient.createYarnClient();
         yarnClient.init(yarnConf);
         yarnClient.start();
@@ -188,8 +191,8 @@ public class YarnUtil {
      * @param jobId:     Flink JobId
      * @param flinkConf: flink配置文件
      */
-    public static String stopYarnJob(String appId, String jobId, String flinkConf, String defaultHdfs) throws Exception {
-        Configuration flinkConfig = getFlinkConf(flinkConf, defaultHdfs);
+    public static String stopYarnJob(String appId, String jobId, String flinkConf) throws Exception {
+        Configuration flinkConfig = getFlinkConf(flinkConf);
         flinkConfig.set(YarnConfigOptions.APPLICATION_ID, appId);
         String savePointsDir = flinkConfig.getString(CheckpointingOptions.SAVEPOINT_DIRECTORY);
         if (StringUtils.isBlank(savePointsDir)) {
@@ -198,7 +201,7 @@ public class YarnUtil {
             String separator = separator(savePointsDir);
             savePointsDir = savePointsDir + separator + jobId;
         }
-        ClusterClient<ApplicationId> clusterClient = getApplicationIdClusterClient(flinkConf, defaultHdfs, flinkConfig);
+        ClusterClient<ApplicationId> clusterClient = getApplicationIdClusterClient(flinkConf, flinkConfig);
         CompletableFuture<String> completableFuture = clusterClient.stopWithSavepoint(parseJobId(jobId), true, savePointsDir, SavepointFormatType.DEFAULT);
         String savePoints = completableFuture.get(30, TimeUnit.SECONDS);
         log.info("停止任务，applicationId：{}，jobId：{}，savePoints：{}", appId, jobId, savePoints);
@@ -212,34 +215,34 @@ public class YarnUtil {
      * @param jobId:     Flink JobId
      * @param flinkConf: flink配置文件
      */
-    public static void cancelYarnJob(String appId, String jobId, String flinkConf, String defaultHdfs) throws Exception {
-        Configuration flinkConfig = getFlinkConf(flinkConf, defaultHdfs);
+    public static void cancelYarnJob(String appId, String jobId, String flinkConf) throws Exception {
+        Configuration flinkConfig = getFlinkConf(flinkConf);
         flinkConfig.set(YarnConfigOptions.APPLICATION_ID, appId);
-        ClusterClient<ApplicationId> clusterClient = getApplicationIdClusterClient(flinkConf, defaultHdfs, flinkConfig);
+        ClusterClient<ApplicationId> clusterClient = getApplicationIdClusterClient(flinkConf, flinkConfig);
         CompletableFuture<Acknowledge> cancel = clusterClient.cancel(parseJobId(jobId));
         cancel.get(30, TimeUnit.SECONDS);
         log.info("停止任务，applicationId：{}，jobId：{}", appId, jobId);
     }
 
-    private static ClusterClient<ApplicationId> getApplicationIdClusterClient(String flinkConf, String defaultHdfs, Configuration flinkConfig) throws ClusterRetrieveException {
+    private static ClusterClient<ApplicationId> getApplicationIdClusterClient(String flinkConf, Configuration flinkConfig) throws ClusterRetrieveException {
         YarnClusterClientFactory clusterClientFactory = new YarnClusterClientFactory();
         ApplicationId applicationId = clusterClientFactory.getClusterId(flinkConfig);
         if (applicationId == null) {
             throw new RuntimeException("yarn集群信息配置错误");
         }
-        YarnClusterDescriptor clusterDescriptor = initYarnClusterDescriptor(flinkConfig, flinkConf, defaultHdfs);
+        YarnClusterDescriptor clusterDescriptor = initYarnClusterDescriptor(flinkConfig, flinkConf);
         return clusterDescriptor.retrieve(applicationId).getClusterClient();
     }
 
     /**
      * log4j文件只能以file形式扔给flink
      */
-    private static void settingLog(Configuration flinkConfig, String flinkConf, String defaultHdfs) {
+    private static void settingLog(Configuration flinkConfig, String flinkConf) {
         final String log4jFileName = "log4j.properties";
         String hdfsLogFile = flinkConf + log4jFileName;
         try {
             // 下载文件到本地
-            HdfsUtil.copyToLocalFile(hdfsLogFile, "../" + log4jFileName, defaultHdfs);
+            HdfsUtil.copyToLocalFile(hdfsLogFile, "../" + log4jFileName);
         } catch (IOException e) {
             throw new RuntimeException("下载log4j.properties失败");
         }
@@ -247,14 +250,15 @@ public class YarnUtil {
     }
 
     /**
+     * 初始化 YarnClusterDescriptor
+     *
      * @param flinkConfig: flink configuration
      * @param yarnConfUrl: yarn config
-     * @description: 初始化 YarnClusterDescriptor
      */
-    private static YarnClusterDescriptor initYarnClusterDescriptor(Configuration flinkConfig, String yarnConfUrl, String defaultHdfs) {
+    private static YarnClusterDescriptor initYarnClusterDescriptor(Configuration flinkConfig, String yarnConfUrl) {
         YarnClient yarnClient = YarnClient.createYarnClient();
         YarnConfiguration yarnConf = new YarnConfiguration();
-        ConfigUtil.initConfig(yarnConf, yarnConfUrl, defaultHdfs);
+        ConfigUtil.initConfig(yarnConf, yarnConfUrl);
         yarnClient.init(yarnConf);
         yarnClient.start();
         return new YarnClusterDescriptor(flinkConfig, yarnConf, yarnClient, YarnClientYarnClusterInformationRetriever.create(yarnClient), false);
@@ -284,11 +288,11 @@ public class YarnUtil {
     /**
      * 获取flink配置
      */
-    public static Configuration getFlinkConf(String pathPrefix, String defaultHdfs) {
+    public static Configuration getFlinkConf(String pathPrefix) {
         try {
             Configuration config = new Configuration();
             String separator = separator(pathPrefix);
-            Properties properties = loadPropertiesByPath(HdfsUtil.readFile(pathPrefix + separator + Constants.FLINK_CONF_YAML, defaultHdfs));
+            Properties properties = loadPropertiesByPath(HdfsUtil.readFile(pathPrefix + separator + Constants.FLINK_CONF_YAML));
             for (Map.Entry<Object, Object> props : properties.entrySet()) {
                 config.setString(String.valueOf(props.getKey()), String.valueOf(props.getValue()));
             }
@@ -314,12 +318,7 @@ public class YarnUtil {
 
     public static String getQueueName(String flinkRunConfig) throws ParseException {
         String getYarnQueueName = ConfigUtil.getYarnQueueName(flinkRunConfig);
-        log.info("得到队列名称是：getYarnQueueName: {}", getYarnQueueName);
+        log.info("getYarnQueueName: {}", getYarnQueueName);
         return getYarnQueueName;
-    }
-
-    public static void main(String[] args) throws Exception {
-//        List<ApplicationModel> apache_flink = listYarnRunningJob("/Users/casey/flink/flink-1.11.2/conf/", "Apache Flink");
-        stopYarnJob("application_1609140197718_1846", "a05022d7dca5483271a4f3b16aeab5b7", "/Users/casey/flink/flink-1.11.2/conf/", "");
     }
 }

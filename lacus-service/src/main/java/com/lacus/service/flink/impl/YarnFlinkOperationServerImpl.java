@@ -12,12 +12,13 @@ import com.lacus.service.flink.IFlinkOperationService;
 import com.lacus.service.flink.IYarnRpcService;
 import com.lacus.service.flink.model.JobRunParamDTO;
 import com.lacus.service.flink.model.YarnJobInfo;
+import com.lacus.utils.PropertyUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import static com.lacus.common.constant.Constants.DEFAULT_SAVEPOINT_PATH;
+import static com.lacus.common.constant.Constants.FLINK_DEFAULT_SAVEPOINT_PATH;
 import static com.lacus.common.constant.Constants.YARN_FLINK_OPERATION_SERVER;
 
 /**
@@ -108,7 +109,7 @@ public class YarnFlinkOperationServerImpl implements IFlinkOperationService {
         }
         //1、 执行savepoint
         try {
-            commandRpcClientService.savepointForPerYarn(jobInfo.getId(), DEFAULT_SAVEPOINT_PATH + jobId, flinkJobEntity.getAppId());
+            commandRpcClientService.savepointForPerYarn(jobInfo.getId(), PropertyUtils.getString(FLINK_DEFAULT_SAVEPOINT_PATH) + jobId, flinkJobEntity.getAppId());
         } catch (Exception e) {
             throw new CustomException("执行savePoint失败");
         }

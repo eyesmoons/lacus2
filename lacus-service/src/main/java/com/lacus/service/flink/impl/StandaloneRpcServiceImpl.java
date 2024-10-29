@@ -6,6 +6,7 @@ import com.lacus.enums.DeployModeEnum;
 import com.lacus.service.flink.IStandaloneRpcService;
 import com.lacus.service.flink.model.StandaloneFlinkJobInfo;
 import com.lacus.service.system.ISysConfigService;
+import com.lacus.utils.PropertyUtils;
 import com.lacus.utils.RestUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.ObjectUtils;
@@ -13,6 +14,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.ResourceAccessException;
@@ -100,7 +102,7 @@ public class StandaloneRpcServiceImpl implements IStandaloneRpcService {
     public String getFlinkHttpAddress(DeployModeEnum deployModeEnum) {
         switch (deployModeEnum) {
             case LOCAL:
-                String urlLocal = configService.getConfigValueByKey(FLINK_HTTP_ADDRESS);
+                String urlLocal = PropertyUtils.getString(FLINK_HTTP_ADDRESS);
                 if (StringUtils.isEmpty(urlLocal)) {
                     throw new CustomException("flink Rest web 地址为空");
                 }
@@ -109,7 +111,7 @@ public class StandaloneRpcServiceImpl implements IStandaloneRpcService {
                 }
                 throw new CustomException("网络异常 url：" + urlLocal);
             case STANDALONE:
-                String urlHA = configService.getConfigValueByKey(FLINK_REST_HA_HTTP_ADDRESS);
+                String urlHA = PropertyUtils.getString(FLINK_REST_HA_HTTP_ADDRESS);
                 if (StringUtils.isEmpty(urlHA)) {
                     throw new CustomException(FLINK_REST_HA_HTTP_ADDRESS + "为空");
                 }
@@ -128,7 +130,8 @@ public class StandaloneRpcServiceImpl implements IStandaloneRpcService {
     public boolean checkUrlConnect(String url) {
         try {
             log.info("connect url：{}", url);
-            restUtil.exchangeGet(url, new HttpHeaders(), String.class, new HttpEntity<String>(null, new HttpHeaders()));
+            ResponseEntity<String> response = restUtil.exchangeGet(url, new HttpHeaders(), String.class, new HttpEntity<String>(null, new HttpHeaders()));
+            log.info("connect url 请求结果：{}", response);
         } catch (ResourceAccessException e) {
             if (e.getCause() instanceof ConnectException || e.getCause() instanceof SocketTimeoutException) {
                 log.error("网络异常或者超时 url：{}", url, e);
