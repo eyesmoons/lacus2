@@ -770,7 +770,7 @@ public class JobDefinitionService {
         ApplicationModel applicationModel = new ApplicationModel();
         if (FlinkStatusEnum.isRunning(instance.getStatus())) {
             FlinkJobDetail jobDetail = monitorService.flinkJobDetail(instance.getApplicationId());
-            applicationModel = monitorService.yarnJobDetail(PropertyUtils.getString(DEFAULT_HDFS_CONFIG), instance.getApplicationId());
+            applicationModel = monitorService.yarnJobDetail(instance.getApplicationId());
             applicationModel.setDuration(DateUtils.convertNumber2DateString(jobDetail.getDuration()));
         } else {
             applicationModel.setApplicationId(instance.getApplicationId());
