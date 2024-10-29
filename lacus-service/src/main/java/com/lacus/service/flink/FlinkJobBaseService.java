@@ -32,7 +32,7 @@ import static com.lacus.enums.DeployModeEnum.YARN_PER;
 @Slf4j
 public class FlinkJobBaseService {
 
-    public static final ThreadLocal<String> APPID_THREAD_LOCAL = new ThreadLocal<String>();
+    public static final ThreadLocal<String> APPID_THREAD_LOCAL = new ThreadLocal<>();
 
     @Autowired
     private IYarnRpcService IYarnRpcService;
