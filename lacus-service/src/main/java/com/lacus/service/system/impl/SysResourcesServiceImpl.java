@@ -6,14 +6,14 @@ import com.lacus.dao.system.entity.SysResourcesEntity;
 import com.lacus.dao.system.mapper.SysResourcesMapper;
 import com.lacus.enums.ResourceType;
 import com.lacus.service.system.ISysResourcesService;
+import org.apache.commons.lang3.ObjectUtils;
 import org.springframework.stereotype.Service;
 
-import java.util.Collections;
 import java.util.List;
 
 /**
  * <p>
- *  服务实现类
+ * 服务实现类
  * </p>
  *
  * @author casey
@@ -30,12 +30,12 @@ public class SysResourcesServiceImpl extends ServiceImpl<SysResourcesMapper, Sys
     }
 
     @Override
-    public List<SysResourcesEntity> listResource(ResourceType type, Long pid, String fileName) {
+    public List<SysResourcesEntity> listResource(ResourceType type, Long pid, String fileName, Integer isDirectory) {
         QueryWrapper<SysResourcesEntity> wrapper = new QueryWrapper<>();
-        wrapper.eq("pid", pid);
-        wrapper.eq("is_directory", 0);
-        wrapper.eq("type", type.getCode());
-        wrapper.like("file_name", fileName);
+        wrapper.eq(ObjectUtils.isNotEmpty(pid), "pid", pid);
+        wrapper.eq(ObjectUtils.isNotEmpty(isDirectory), "is_directory", isDirectory);
+        wrapper.eq(ObjectUtils.isNotEmpty(type.getCode()), "type", type.getCode());
+        wrapper.like(ObjectUtils.isNotEmpty(fileName), "file_name", fileName);
         return this.list(wrapper);
     }
 }

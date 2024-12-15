@@ -25,11 +25,14 @@ public class SysResourcesEntity extends BaseEntity<SysResourcesEntity> {
 
     @ApiModelProperty("resource id")
     @TableId(value = "id", type = IdType.AUTO)
-    private Integer id;
+    private Long id;
 
     @ApiModelProperty("parent resource id")
     @TableField("pid")
-    private Integer pid;
+    private Long pid;
+
+    @TableField(exist = false)
+    private String pFilePath;
 
     @ApiModelProperty("alia name")
     @TableField("name")

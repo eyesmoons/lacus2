@@ -6,9 +6,7 @@ import com.lacus.common.constant.Constants;
 import com.lacus.common.core.page.PageDTO;
 import com.lacus.common.exception.CustomException;
 import com.lacus.dao.system.entity.StorageEntity;
-import com.lacus.dao.system.entity.SysEnvEntity;
 import com.lacus.dao.system.entity.SysResourcesEntity;
-import com.lacus.domain.system.env.dto.EnvDTO;
 import com.lacus.domain.system.resources.command.ResourceAddCommand;
 import com.lacus.domain.system.resources.dto.ResourceComponent;
 import com.lacus.domain.system.resources.dto.visitor.ResourceTreeVisitor;
@@ -34,6 +32,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
@@ -58,7 +57,7 @@ public class ResourceService {
     @Autowired
     private ISysResourcesService sysResourcesService;
 
-    public void createDirectory(Long pid, String name, ResourceType type) {
+    public void createDirectory(Long pid, String name, ResourceType type, String remark) {
         if (FileUtil.directoryTraversal(name)) {
             log.warn("Parameter name is invalid, name:{}.", RegexUtils.escapeNRT(name));
             throw new CustomException(Status.VERIFY_PARAMETER_NAME_FAILED.getMsg(), Status.VERIFY_PARAMETER_NAME_FAILED.getCode());
@@ -85,17 +84,15 @@ public class ResourceService {
         // create directory in hdfs
         createDirectory(fullName, type);
         // save to db
-        addResource(pid, name, fullName, 1);
+        addResource(pid, name, fullName, remark, 1);
     }
 
-    public void uploadResource(Long pid, String aliaName, ResourceType type, MultipartFile file) {
-        verifyFile(aliaName, type, file);
+    public void uploadResource(Long pid, String aliaName, String remark, ResourceType type, MultipartFile file) {
+        verifyFile(pid, aliaName, type, file);
 
         // check resource name exists
-        String userResRootPath = ResourceType.UDF.equals(type) ? storageOperate.getUdfDir() : storageOperate.getResDir();
         SysResourcesEntity pResource = sysResourcesService.getById(pid);
-        String currentDir = ObjectUtils.isEmpty(pResource) ? userResRootPath : pResource.getFilePath();
-        String currDirNFileName = !currentDir.contains(userResRootPath) ? userResRootPath + aliaName : currentDir + aliaName;
+        String currDirNFileName = pResource.getFilePath() + File.separator + aliaName;
 
         try {
             if (checkResourceExists(currDirNFileName)) {
@@ -120,15 +117,15 @@ public class ResourceService {
         }
 
         // save to db
-        addResource(pid, aliaName, currDirNFileName, 1);
+        addResource(pid, aliaName, currDirNFileName, remark, 0);
     }
 
     public List<SysResourcesEntity> queryResourceDirectoryList(ResourceType type) {
         return sysResourcesService.listDirectory(type);
     }
 
-    public List<SysResourcesEntity> queryResourceList(ResourceType type, Long pid, String fileName) {
-        return sysResourcesService.listResource(type, pid, fileName);
+    public List<SysResourcesEntity> queryResourceList(ResourceType type, Long pid, String fileName, Integer isDirectory) {
+        return sysResourcesService.listResource(type, pid, fileName, isDirectory);
     }
 
     public List<ResourceComponent> queryResourceListBak(Boolean isDirectory, ResourceType type, String fullName) {
@@ -155,6 +152,32 @@ public class ResourceService {
     public PageDTO queryResourceListPaging(ResourceQuery query) {
         Page<SysResourcesEntity> page = sysResourcesService.page(query.toPage(), query.toQueryWrapper());
         return new PageDTO(page.getRecords(), page.getTotal());
+    }
+
+    public PageDTO queryAllResourcesPaging(ResourceQuery query) {
+        List<SysResourcesEntity> allResources = new ArrayList<>();
+        // 递归查询所有资源
+        findAllResourcesRecursively(query.getPid(), allResources);
+        // 分页处理
+        int start = (query.getPageNum() - 1) * query.getPageSize();
+        int end = Math.min(start + query.getPageSize(), allResources.size());
+        List<SysResourcesEntity> pagedResources = allResources.subList(start, end);
+        return new PageDTO(pagedResources, (long) allResources.size());
+    }
+
+    private void findAllResourcesRecursively(Long pid, List<SysResourcesEntity> allResources) {
+        List<SysResourcesEntity> resources = sysResourcesService.listResource(ResourceType.FILE, pid, null, null);
+        for (SysResourcesEntity resource : resources) {
+            if (resource.getIsDirectory() == 1) {
+                findAllResourcesRecursively(resource.getId(), allResources);
+            } else if (resource.getIsDirectory() == 0) {
+                SysResourcesEntity pResource = sysResourcesService.getById(resource.getPid());
+                if (ObjectUtils.isNotEmpty(pResource)) {
+                    resource.setPFilePath(pResource.getFilePath());
+                }
+                allResources.add(resource);
+            }
+        }
     }
 
     public void deleteResource(long id) throws IOException {
@@ -211,9 +234,9 @@ public class ResourceService {
         }
     }
 
-    private static void addResource(Long pid, String name, String fullName, Integer isDirectory) {
+    private static void addResource(Long pid, String aliasName, String fullName, String remark, Integer isDirectory) {
         String fileName = new File(fullName).getName();
-        ResourceAddCommand command = new ResourceAddCommand(pid, 0, name, fileName, fullName, isDirectory);
+        ResourceAddCommand command = new ResourceAddCommand(pid, 0, aliasName, fileName, fullName, isDirectory, remark);
         ResourceModel model = ResourceModelFactory.loadFromAddCommand(command, new ResourceModel());
         model.insert();
     }
@@ -243,7 +266,10 @@ public class ResourceService {
         }
     }
 
-    private void verifyFile(String name, ResourceType type, MultipartFile file) {
+    private void verifyFile(Long pid, String name, ResourceType type, MultipartFile file) {
+        if (pid == 0) {
+            throw new CustomException("根目录不支持上传文件，请选择其他目录！");
+        }
         if (FileUtil.directoryTraversal(name)) {
             log.warn("Parameter file alias name verify failed, fileAliasName:{}.", RegexUtils.escapeNRT(name));
             throw new CustomException(Status.VERIFY_PARAMETER_NAME_FAILED.getMsg(), Status.VERIFY_PARAMETER_NAME_FAILED.getCode());
@@ -297,7 +323,7 @@ public class ResourceService {
         String localFilename = FileUtil.getUploadFilename(UUID.randomUUID().toString());
 
         // save file to hdfs, and delete original file
-        String resourcePath = storageOperate.getDir(type);
+        String resourcePath = storageOperate.getHdfsPath() + fullName;
         try {
             // if tenant dir not exists
             if (!storageOperate.exists(resourcePath)) {

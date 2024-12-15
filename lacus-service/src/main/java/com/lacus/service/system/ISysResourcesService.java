@@ -17,5 +17,5 @@ public interface ISysResourcesService extends IService<SysResourcesEntity> {
 
     List<SysResourcesEntity> listDirectory(ResourceType type);
 
-    List<SysResourcesEntity> listResource(ResourceType type, Long pid, String fileName);
+    List<SysResourcesEntity> listResource(ResourceType type, Long pid, String fileName, Integer isDirectory);
 }

@@ -10,4 +10,5 @@ import lombok.Data;
 public class AddDirectoryCommand {
     private Long pid;
     private String name;
+    private String remark;
 }

@@ -49,6 +49,8 @@ public interface IStorageOperate {
 
     boolean copy(String srcPath, String dstPath, boolean deleteSource, boolean overwrite) throws IOException;
 
+    String getHdfsPath();
+
     String getDir(ResourceType resourceType);
 
     void upload(String srcFile, String dstPath, boolean deleteSource, boolean overwrite) throws IOException;

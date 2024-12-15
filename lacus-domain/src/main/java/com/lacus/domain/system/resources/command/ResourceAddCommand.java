@@ -32,4 +32,6 @@ public class ResourceAddCommand {
 
     @NotNull
     private Integer isDirectory;
+
+    private String remark;
 }

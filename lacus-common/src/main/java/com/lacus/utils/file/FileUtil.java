@@ -13,7 +13,12 @@ import org.springframework.core.io.Resource;
 import org.springframework.core.io.UrlResource;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.*;
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.FileAlreadyExistsException;
@@ -33,7 +38,7 @@ import static com.lacus.utils.time.DateUtils.YYYYMMDDHHMMSS;
 @Slf4j
 public class FileUtil {
 
-    public static final String DATA_BASEDIR = PropertyUtils.getString(DATA_BASEDIR_PATH, "/tmp/lacus");
+    public static final String DATA_BASEDIR = PropertyUtils.getString(DATA_BASEDIR_PATH, System.getProperty("user.home") + "/tmp/lacus");
 
     public static final String APPINFO_PATH = "appInfo.log";
 

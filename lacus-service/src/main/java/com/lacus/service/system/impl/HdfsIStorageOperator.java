@@ -462,8 +462,8 @@ public class HdfsIStorageOperator implements Closeable, IStorageOperate {
                                        ResourceType type) throws IOException {
         try {
             FileStatus fileStatus = fs.getFileStatus(new Path(path));
-            String alias = "";
-            String fileName = "";
+            String alias;
+            String fileName;
             String fullName = fileStatus.getPath().toString();
             if (fileStatus.isDirectory()) {
                 fullName = addFolderSeparatorIfNotExisted(fullName);
@@ -520,6 +520,10 @@ public class HdfsIStorageOperator implements Closeable, IStorageOperate {
         } else {
             return defaultFS + RESOURCE_UPLOAD_PATH;
         }
+    }
+
+    public String getHdfsPath(){
+        return hdfsProperties.getDefaultFS();
     }
 
     public static String getHdfsDir(ResourceType resourceType) {

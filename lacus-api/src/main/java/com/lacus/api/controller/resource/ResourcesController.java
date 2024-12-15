@@ -9,6 +9,7 @@ import com.lacus.domain.system.resources.query.ResourceQuery;
 import com.lacus.enums.ResourceType;
 import com.lacus.enums.Status;
 import io.swagger.annotations.ApiOperation;
+import org.apache.commons.lang3.ObjectUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.Resource;
 import org.springframework.http.HttpHeaders;
@@ -41,21 +42,27 @@ public class ResourcesController extends BaseController {
     @ApiOperation("创建目录")
     @PostMapping(value = "/directory/create")
     public ResponseDTO<?> createDirectory(@RequestBody AddDirectoryCommand command) {
-        resourceService.createDirectory(command.getPid(), command.getName(), ResourceType.FILE);
+        resourceService.createDirectory(command.getPid(), command.getName(), ResourceType.FILE, command.getRemark());
         return ResponseDTO.ok();
     }
 
     @ApiOperation("上传文件")
-    @PostMapping("/upload")
-    public ResponseDTO<?> uploadResource(@RequestParam(value = "pid") Long pid, @RequestParam(value = "aliaName") String aliaName, @RequestParam("file") MultipartFile file) {
-        resourceService.uploadResource(pid, aliaName, ResourceType.FILE, file);
+    @PostMapping("/file/upload")
+    public ResponseDTO<?> uploadResource(@RequestParam(value = "pid") Long pid,
+                                         @RequestParam(value = "aliasName", required = false) String aliasName,
+                                         @RequestParam(value = "remark", required = false) String remark,
+                                         MultipartFile file) {
+        if (ObjectUtils.isEmpty(aliasName)) {
+            aliasName = file.getOriginalFilename();
+        }
+        resourceService.uploadResource(pid, aliasName, remark, ResourceType.FILE, file);
         return ResponseDTO.ok();
     }
 
     @ApiOperation("文件列表")
     @GetMapping(value = "/file/list")
     public ResponseDTO<?> queryResourceList(@RequestParam(value = "pid") Long pid, @RequestParam(value = "fileName") String fileName) {
-        return ResponseDTO.ok(resourceService.queryResourceList(ResourceType.FILE, pid, fileName));
+        return ResponseDTO.ok(resourceService.queryResourceList(ResourceType.FILE, pid, fileName, 0));
     }
 
     @ApiOperation("文件列表分页")
@@ -63,7 +70,7 @@ public class ResourcesController extends BaseController {
     public ResponseDTO<?> queryResourceListPaging(ResourceQuery query) {
         query.setIsDirectory(0);
         checkPageParams(query.getPageNum(), query.getPageSize());
-        return ResponseDTO.ok(resourceService.queryResourceListPaging(query));
+        return ResponseDTO.ok(resourceService.queryAllResourcesPaging(query));
     }
 
     @ApiOperation("目录列表")
@@ -81,8 +88,8 @@ public class ResourcesController extends BaseController {
     }
 
     @ApiOperation("删除文件")
-    @DeleteMapping
-    public ResponseDTO<?> deleteResource(@RequestParam(value = "id") long id) throws IOException {
+    @DeleteMapping("/{id}")
+    public ResponseDTO<?> deleteResource(@PathVariable(value = "id") long id) throws IOException {
         resourceService.deleteResource(id);
         return ResponseDTO.ok();
     }
