@@ -1,4 +1,4 @@
-package com.lacus.enums;
+package com.lacus.flink.enums;
 
 import lombok.Getter;
 import org.apache.commons.lang3.StringUtils;

@@ -21,7 +21,6 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.validation.Valid;
@@ -43,7 +42,7 @@ public class FlinkJobController {
     @ApiOperation("任务分页列表")
     @GetMapping
     @PreAuthorize("@permission.has('flink:job:list')")
-    public ResponseDTO<?> jobListPaging(@RequestParam @Valid JobPageQuery query) {
+    public ResponseDTO<?> jobListPaging(@Valid JobPageQuery query) {
         PageDTO page = flinkJobService.pageList(query);
         return ResponseDTO.ok(page);
     }
@@ -51,21 +50,21 @@ public class FlinkJobController {
     @ApiOperation("新建flink sql流任务")
     @PostMapping("/sql/streaming")
     public ResponseDTO<?> addFlinkSqlStreamingJob(@RequestBody @Valid AddFlinkSqlJobCommand addCommand) {
-        addCommand.setJobType(FlinkJobTypeEnum.FLINK_SQL_STREAMING.name());
+        addCommand.setJobType(FlinkJobTypeEnum.STREAMING_SQL.name());
         return ResponseDTO.ok(flinkJobService.addFlinkSqlJob(addCommand));
     }
 
     @ApiOperation("新建flink sql批任务")
     @PostMapping("/sql/batch")
     public ResponseDTO<?> addFlinkSqlBatchJob(@RequestBody @Valid AddFlinkSqlJobCommand addCommand) {
-        addCommand.setJobType(FlinkJobTypeEnum.FLINK_SQL_BATCH.name());
+        addCommand.setJobType(FlinkJobTypeEnum.BATCH_SQL.name());
         return ResponseDTO.ok(flinkJobService.addFlinkSqlJob(addCommand));
     }
 
     @ApiOperation("新建flink jar任务")
     @PostMapping("/jar")
     public ResponseDTO<?> addFlinkJarJob(@RequestBody @Valid AddFlinkJarJobCommand addCommand) {
-        addCommand.setJobType(FlinkJobTypeEnum.FLINK_JAR.name());
+        addCommand.setJobType(FlinkJobTypeEnum.JAR.name());
         return ResponseDTO.ok(flinkJobService.addFlinkJarJob(addCommand));
     }
 

@@ -19,7 +19,7 @@ import static com.lacus.common.constant.Constants.FLINK_STREAMING_JARVERSION;
 @Service
 @Slf4j
 public class CommandServiceImpl implements ICommandService {
-    private static final String APP_CLASS_NAME = "com.lacus.core.flink.FlinkBatchJobApplication";
+    private static final String APP_CLASS_NAME = "com.lacus.flink.FlinkBatchJobApplication";
 
     @Autowired
     private ISysEnvService envService;
@@ -58,17 +58,17 @@ public class CommandServiceImpl implements ICommandService {
             }
         }
         switch (flinkJobEntity.getJobType()) {
-            case FLINK_SQL_BATCH:
-            case FLINK_SQL_STREAMING:
+            case BATCH_SQL:
+            case STREAMING_SQL:
                 command.append(" -c ").append(APP_CLASS_NAME);
                 command.append(" ").append(jobRunParamDTO.getSysHome()).append(PropertyUtils.getString(FLINK_STREAMING_JARVERSION));
                 command.append(" -sql ").append(jobRunParamDTO.getSqlPath());
                 if (StringUtils.isNotEmpty(jobRunParamDTO.getFlinkCheckpointConfig())) {
-                    command.append(" ").append(jobRunParamDTO.getFlinkCheckpointConfig());
+                    command.append(" -checkpointDir ").append(jobRunParamDTO.getFlinkCheckpointConfig());
                 }
                 command.append(" -type ").append(flinkJobEntity.getJobType());
                 break;
-            case FLINK_JAR:
+            case JAR:
                 command.append(" -c ").append(flinkJobEntity.getMainClass());
                 command.append(" ").append(jobRunParamDTO.getMainJarPath());
                 command.append(" ").append(flinkJobEntity.getCustomArgs());
@@ -76,7 +76,7 @@ public class CommandServiceImpl implements ICommandService {
             default:
                 log.warn("不支持的模式 {}", flinkJobEntity.getJobType());
         }
-        log.info("buildRunCommandForLocal runCommand：{}", command);
+        log.info("runCommand：{}", command);
         return command.toString();
     }
 
@@ -88,11 +88,9 @@ public class CommandServiceImpl implements ICommandService {
         StringBuilder command = new StringBuilder();
         Long envId = flinkJobEntity.getEnvId();
         SysEnvEntity env = envService.getById(envId);
-        if (ObjectUtils.isEmpty(env)) {
-            throw new CustomException("未设置环境变量");
+        if (ObjectUtils.isNotEmpty(env)) {
+            command.append(env.getConfig()).append("\n");
         }
-        String config = env.getConfig();
-        command.append(config).append("\n");
         command.append(jobRunParamDTO.getFlinkBinPath());
         if (DeployModeEnum.YARN_APPLICATION == flinkJobEntity.getDeployMode()) {
             command.append("  run-application -t yarn-application  ");
@@ -116,16 +114,17 @@ public class CommandServiceImpl implements ICommandService {
         }
 
         switch (flinkJobEntity.getJobType()) {
-            case FLINK_SQL_STREAMING:
-            case FLINK_SQL_BATCH:
+            case STREAMING_SQL:
+            case BATCH_SQL:
                 command.append(" -c ").append(APP_CLASS_NAME);
                 command.append(" ").append(jobRunParamDTO.getSysHome()).append(PropertyUtils.getString(FLINK_STREAMING_JARVERSION));
                 command.append(" -sql ").append(jobRunParamDTO.getSqlPath());
                 if (StringUtils.isNotEmpty(jobRunParamDTO.getFlinkCheckpointConfig())) {
-                    command.append(" ").append(jobRunParamDTO.getFlinkCheckpointConfig());
+                    command.append(" -checkpointDir ").append(jobRunParamDTO.getFlinkCheckpointConfig());
                 }
+                command.append(" -type ").append(flinkJobEntity.getJobType());
                 break;
-            case FLINK_JAR:
+            case JAR:
                 command.append(" -c ").append(flinkJobEntity.getMainClass());
                 command.append(" ").append(jobRunParamDTO.getMainJarPath());
                 command.append(" ").append(flinkJobEntity.getCustomArgs());
@@ -133,7 +132,7 @@ public class CommandServiceImpl implements ICommandService {
             default:
                 log.warn("不支持的部署模式 {}", flinkJobEntity.getJobType());
         }
-        log.info("buildRunCommandForYarnCluster runCommand: {}", command);
+        log.info("runCommand: {}", command);
         return command.toString();
     }
 

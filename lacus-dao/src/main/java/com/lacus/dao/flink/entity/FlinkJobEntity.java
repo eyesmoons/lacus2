@@ -64,4 +64,19 @@ public class FlinkJobEntity extends BaseEntity<FlinkJobEntity> {
 
     @TableField("remark")
     private String remark;
+
+    @TableField("job_manager")
+    private Integer jobManager;
+
+    @TableField("task_manager")
+    private Integer taskManager;
+
+    @TableField("slot")
+    private Integer slot;
+
+    @TableField("parallelism")
+    private Integer parallelism;
+
+    @TableField("queue")
+    private String queue;
 }

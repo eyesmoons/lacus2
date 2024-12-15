@@ -1,12 +1,6 @@
 package com.lacus.domain.flink.job.command;
 
-import com.baomidou.mybatisplus.annotation.IdType;
-import com.baomidou.mybatisplus.annotation.TableField;
-import com.baomidou.mybatisplus.annotation.TableId;
-import com.baomidou.mybatisplus.annotation.TableName;
-import com.lacus.common.core.base.BaseEntity;
 import lombok.Data;
-import lombok.EqualsAndHashCode;
 
 import javax.validation.constraints.NotEmpty;
 
@@ -15,7 +9,7 @@ import javax.validation.constraints.NotEmpty;
  * @date 2024/9/13 17:54
  */
 @Data
-public class AddFlinkJarJobCommand {
+public class AddFlinkJarJobCommand extends CommonFlinkRunCommand {
 
     @NotEmpty(message = "任务名称不能为空")
     private String jobName;
@@ -38,7 +32,6 @@ public class AddFlinkJarJobCommand {
 
     private String customArgs;
 
-    @NotEmpty(message = "环境不能为空")
     private Long envId;
 
     private String remark;

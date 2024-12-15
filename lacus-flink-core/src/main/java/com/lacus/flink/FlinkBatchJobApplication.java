@@ -1,12 +1,12 @@
-package com.lacus.core.flink;
+package com.lacus.flink;
 
-import com.lacus.core.flink.checkpoint.CheckPointParams;
-import com.lacus.core.flink.checkpoint.FsCheckPoint;
-import com.lacus.core.flink.executor.ExecuteSql;
-import com.lacus.core.flink.model.JobRunParam;
-import com.lacus.core.flink.parser.SqlFileParser;
-import com.lacus.enums.FlinkJobTypeEnum;
-import com.lacus.utils.UrlUtils;
+import com.lacus.flink.checkpoint.CheckPointParams;
+import com.lacus.flink.checkpoint.FsCheckPoint;
+import com.lacus.flink.enums.FlinkJobTypeEnum;
+import com.lacus.flink.executor.ExecuteSql;
+import com.lacus.flink.model.JobRunParam;
+import com.lacus.flink.parser.SqlFileParser;
+import com.lacus.flink.utils.UrlUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.flink.api.common.JobID;
 import org.apache.flink.api.java.utils.ParameterTool;
@@ -40,16 +40,15 @@ public class FlinkBatchJobApplication {
             List<String> sqlList = SqlFileParser.parserSql(fileList);
             EnvironmentSettings settings;
             TableEnvironment tEnv;
-            if (jobRunParam.getJobTypeEnum() != null && FlinkJobTypeEnum.FLINK_SQL_BATCH.equals(jobRunParam.getJobTypeEnum())) {
-                logger.info("[SQL_BATCH]本次任务是批任务");
+            if (jobRunParam.getJobTypeEnum() != null && FlinkJobTypeEnum.BATCH_SQL.equals(jobRunParam.getJobTypeEnum())) {
+                logger.info("BATCH_SQL任务");
                 //批处理
                 settings = EnvironmentSettings.newInstance().inBatchMode().build();
                 tEnv = TableEnvironment.create(settings);
             } else {
-                logger.info("[SQL_STREAMING]本次任务是流任务");
+                logger.info("STREAMING_SQL任务");
                 //默认是流 流处理 目的是兼容之前版本
                 StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
-
                 settings = EnvironmentSettings.newInstance().inStreamingMode().build();
                 tEnv = StreamTableEnvironment.create(env, settings);
                 //设置checkPoint
@@ -58,6 +57,7 @@ public class FlinkBatchJobApplication {
             JobID jobID = ExecuteSql.exeSql(sqlList, tEnv);
             logger.info("job-submitted-success:{}", jobID);
         } catch (Exception e) {
+            e.printStackTrace();
             System.err.println("任务执行失败:" + e.getMessage());
             logger.error("任务执行失败：", e);
         }

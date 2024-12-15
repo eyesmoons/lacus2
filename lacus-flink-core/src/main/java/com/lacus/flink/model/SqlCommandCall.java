@@ -1,7 +1,7 @@
 package com.lacus.core.flink.model;
 
 
-import com.lacus.enums.SqlCommand;
+import com.lacus.flink.enums.SqlCommand;
 import lombok.Data;
 
 @Data

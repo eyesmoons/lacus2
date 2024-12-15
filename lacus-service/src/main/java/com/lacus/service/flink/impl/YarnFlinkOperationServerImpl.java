@@ -13,6 +13,7 @@ import com.lacus.service.flink.IYarnRpcService;
 import com.lacus.service.flink.model.JobRunParamDTO;
 import com.lacus.service.flink.model.YarnJobInfo;
 import com.lacus.utils.PropertyUtils;
+import com.lacus.utils.time.DateUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -48,27 +49,27 @@ public class YarnFlinkOperationServerImpl implements IFlinkOperationService {
 
     @Override
     public void start(Long jobId, Boolean resume) {
-
         FlinkJobEntity flinkJobEntity = flinkJobService.getById(jobId);
 
-        //1、检查jobConfigDTO 状态等参数
+        // 1、检查jobConfigDTO 状态等参数
         flinkJobBaseService.checkStart(flinkJobEntity);
 
         if (StringUtils.isNotEmpty(flinkJobEntity.getAppId())) {
             this.stop(flinkJobEntity);
         }
 
-        //2、将配置的sql 写入本地文件并且返回运行所需参数
+        // 2、将配置的sql 写入本地文件并且返回运行所需参数
         JobRunParamDTO jobRunParamDTO = flinkJobBaseService.writeSqlToFile(flinkJobEntity);
 
-        //3、保存任务实例
+        // 3、保存任务实例
         FlinkJobInstanceEntity instance = new FlinkJobInstanceEntity();
         instance.setJobId(jobId);
         instance.setInstanceName(flinkJobEntity.getJobName() + "_" + System.currentTimeMillis());
         instance.setStatus(FlinkStatusEnum.RUNNING);
+        instance.setSubmitTime(DateUtils.getNowDate());
         flinkJobInstanceService.save(instance);
 
-        //4、变更任务状态为：启动中
+        // 4、变更任务状态为：启动中
         flinkJobService.updateStatus(jobId, FlinkStatusEnum.RUNNING);
 
         String savepointPath = null;
@@ -76,8 +77,8 @@ public class YarnFlinkOperationServerImpl implements IFlinkOperationService {
             savepointPath = flinkJobEntity.getSavepoint();
         }
 
-        //异步提交任务
-        flinkJobBaseService.aSyncExecJob(jobRunParamDTO, flinkJobEntity, savepointPath);
+        // 异步提交任务
+        flinkJobBaseService.aSyncExecJob(jobRunParamDTO, flinkJobEntity, instance, savepointPath);
     }
 
     @Override

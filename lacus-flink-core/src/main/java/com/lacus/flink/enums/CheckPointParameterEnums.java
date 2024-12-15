@@ -1,4 +1,4 @@
-package com.lacus.enums;
+package com.lacus.flink.enums;
 
 import java.util.Set;
 

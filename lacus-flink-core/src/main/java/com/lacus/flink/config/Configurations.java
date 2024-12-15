@@ -1,4 +1,4 @@
-package com.lacus.core.flink.config;
+package com.lacus.flink.config;
 
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;

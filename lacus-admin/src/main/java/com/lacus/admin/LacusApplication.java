@@ -21,7 +21,7 @@ public class LacusApplication {
 
     public static void main(String[] args) {
         SpringApplication.run(LacusApplication.class, args);
-        System.out.println("Lacus大数据平台启动成功："+ DateUtil.now());
+        System.out.println("Lacus大数据平台启动成功：" + DateUtil.now());
     }
 
     @EventListener

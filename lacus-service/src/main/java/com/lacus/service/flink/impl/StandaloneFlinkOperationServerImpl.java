@@ -15,6 +15,7 @@ import com.lacus.service.flink.IStandaloneRpcService;
 import com.lacus.service.flink.model.JobRunParamDTO;
 import com.lacus.service.flink.model.StandaloneFlinkJobInfo;
 import com.lacus.utils.PropertyUtils;
+import com.lacus.utils.time.DateUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -53,8 +54,7 @@ public class StandaloneFlinkOperationServerImpl implements IFlinkOperationServic
     public void start(Long jobId, Boolean resume) {
         FlinkJobEntity byId = flinkJobService.getById(jobId);
         if (ObjectUtils.isNotEmpty(byId.getAppId())) {
-            if (!Objects.equals(byId.getJobType(), FlinkJobTypeEnum.FLINK_SQL_BATCH)) {
-
+            if (!Objects.equals(byId.getJobType(), FlinkJobTypeEnum.BATCH_SQL)) {
                 StandaloneFlinkJobInfo standaloneFlinkJobInfo = flinkRpcService.getJobInfoForStandaloneByAppId(byId.getAppId(), byId.getDeployMode());
                 if (StringUtils.isNotBlank(standaloneFlinkJobInfo.getState()) && FlinkStatusEnum.RUNNING.name().equalsIgnoreCase(standaloneFlinkJobInfo.getState())) {
                     throw new CustomException("Flink任务[" + byId.getAppId() + "]处于[ " + standaloneFlinkJobInfo.getState() + "]状态，不能重复启动任务！");
@@ -62,20 +62,21 @@ public class StandaloneFlinkOperationServerImpl implements IFlinkOperationServic
             }
         }
 
-        //1、检查任务参数
+        // 1、检查任务参数
         flinkJobBaseService.checkStart(byId);
 
-        //2、将配置的sql写入本地文件并且返回运行所需参数
+        // 2、将配置的sql写入本地文件并且返回运行所需参数
         JobRunParamDTO jobRunParamDTO = flinkJobBaseService.writeSqlToFile(byId);
 
-        //3、保存任务实例
+        // 3、保存任务实例
         FlinkJobInstanceEntity instance = new FlinkJobInstanceEntity();
         instance.setJobId(jobId);
         instance.setInstanceName(byId.getJobName() + "_" + System.currentTimeMillis());
         instance.setStatus(FlinkStatusEnum.RUNNING);
+        instance.setSubmitTime(DateUtils.getNowDate());
         flinkJobInstanceService.save(instance);
 
-        //4、变更任务状态：启动中
+        // 4、变更任务状态：启动中
         flinkJobService.updateStatus(jobId, FlinkStatusEnum.RUNNING);
 
         String savepointPath = null;
@@ -83,8 +84,8 @@ public class StandaloneFlinkOperationServerImpl implements IFlinkOperationServic
             savepointPath = byId.getSavepoint();
         }
 
-        //异步提交任务
-        flinkJobBaseService.aSyncExecJob(jobRunParamDTO, byId, savepointPath);
+        // 异步提交任务
+        flinkJobBaseService.aSyncExecJob(jobRunParamDTO, byId, instance, savepointPath);
     }
 
     @Override
@@ -101,7 +102,7 @@ public class StandaloneFlinkOperationServerImpl implements IFlinkOperationServic
         } else {
             if (isSavePoint) {
                 // 停止前先savepoint
-                if (StringUtils.isNotBlank(flinkJobEntity.getSavepoint()) && flinkJobEntity.getJobType() != FlinkJobTypeEnum.FLINK_SQL_BATCH && FlinkStatusEnum.RUNNING.name().equals(jobStandaloneInfo.getState())) {
+                if (StringUtils.isNotBlank(flinkJobEntity.getSavepoint()) && flinkJobEntity.getJobType() != FlinkJobTypeEnum.BATCH_SQL && FlinkStatusEnum.RUNNING.name().equals(jobStandaloneInfo.getState())) {
                     log.info("开始保存任务[{}]的状态-savepoint", jobId);
                     this.savepoint(jobId);
                 }

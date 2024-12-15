@@ -15,6 +15,7 @@ import com.lacus.domain.flink.job.query.JobPageQuery;
 import com.lacus.service.flink.IFlinkJobService;
 import com.lacus.service.flink.IFlinkOperationService;
 import lombok.extern.slf4j.Slf4j;
+import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -39,27 +40,54 @@ public class FlinkJobService {
 
     public FlinkJobModel addFlinkSqlJob(@Valid AddFlinkSqlJobCommand addCommand) {
         FlinkJobModel model = FlinkJobModelFactory.loadFromSqlAddCommand(addCommand, new FlinkJobModel());
-        model.checkJobNameUnique(flinkJobService);
+        String flinkRunConfig = getFlinkRunConfig(addCommand, model);
+        model.setFlinkRunConfig(flinkRunConfig);
         model.insert();
         return model;
+    }
+
+    @NotNull
+    private String getFlinkRunConfig(AddFlinkSqlJobCommand addCommand, FlinkJobModel model) {
+        model.checkJobNameUnique(flinkJobService);
+        return " -ys " + addCommand.getSlot() +
+                " -yjm " + addCommand.getJobManager() * 1024 +
+                " -ytm " + addCommand.getTaskManager() * 1024 +
+                " -yqu " + addCommand.getQueue() +
+                " -ynm " + addCommand.getJobName() +
+                " -p " + addCommand.getParallelism();
     }
 
     public FlinkJobModel addFlinkJarJob(@Valid AddFlinkJarJobCommand addCommand) {
         FlinkJobModel model = FlinkJobModelFactory.loadFromJarAddCommand(addCommand, new FlinkJobModel());
         model.checkJobNameUnique(flinkJobService);
+        String flinkRunConfig = " -ys " + addCommand.getSlot() +
+                " -yjm " + addCommand.getJobManager() * 1024 +
+                " -ytm " + addCommand.getTaskManager() * 1024 +
+                " -yqu " + addCommand.getQueue() +
+                " -ynm " + addCommand.getJobName() +
+                " -p " + addCommand.getParallelism();
+        model.setFlinkRunConfig(flinkRunConfig);
         model.insert();
         return model;
     }
 
     public void updateFlinkSqlJob(@Valid UpdateFlinkSqlJobCommand updateCommand) {
         FlinkJobModel model = FlinkJobModelFactory.loadFromSqlUpdateCommand(updateCommand, new FlinkJobModel());
-        model.checkJobNameUnique(flinkJobService);
+        String flinkRunConfig = getFlinkRunConfig(updateCommand, model);
+        model.setFlinkRunConfig(flinkRunConfig);
         model.updateById();
     }
 
     public void updateFlinkJarJob(@Valid UpdateFlinkJarJobCommand updateCommand) {
         FlinkJobModel model = FlinkJobModelFactory.loadFromJarUpdateCommand(updateCommand, new FlinkJobModel());
         model.checkJobNameUnique(flinkJobService);
+        String flinkRunConfig = " -ys " + updateCommand.getSlot() +
+                " -yjm " + updateCommand.getJobManager() * 1024 +
+                " -ytm " + updateCommand.getTaskManager() * 1024 +
+                " -yqu " + updateCommand.getQueue() +
+                " -ynm " + updateCommand.getJobName() +
+                " -p " + updateCommand.getParallelism();
+        model.setFlinkRunConfig(flinkRunConfig);
         model.updateById();
     }
 

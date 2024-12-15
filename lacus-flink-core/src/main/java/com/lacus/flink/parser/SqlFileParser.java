@@ -1,7 +1,7 @@
-package com.lacus.core.flink.parser;
+package com.lacus.flink.parser;
 
 import com.lacus.core.flink.model.SqlCommandCall;
-import com.lacus.enums.SqlCommand;
+import com.lacus.flink.enums.SqlCommand;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 

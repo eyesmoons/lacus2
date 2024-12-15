@@ -30,15 +30,14 @@ public class CommandRpcClientServiceImpl implements ICommandRpcClientService {
 
     @Override
     public String submitJob(String command, DeployModeEnum deployModeEnum) throws Exception {
-        log.info(" 任务提交命令是:{} ", command);
+        log.info("任务提交命令：{} ", command);
         Process pcs = Runtime.getRuntime().exec(command);
-
         //清理错误日志
-        this.clearLogStream(pcs.getErrorStream(), String.format("%s#startForLocal-error#%s", DateUtil.now(), deployModeEnum.name()));
+        this.clearLogStream(pcs.getErrorStream(), String.format("[%s]start local error：[%s]", DateUtil.now(), deployModeEnum.name()));
         String appId = this.clearInfoLogStream(pcs.getInputStream(), deployModeEnum);
         int rs = pcs.waitFor();
         if (rs != 0) {
-            throw new RuntimeException("执行异常 is error  rs=" + rs);
+            throw new RuntimeException("执行异常，appId：" + appId);
         }
         return appId;
     }
@@ -46,45 +45,44 @@ public class CommandRpcClientServiceImpl implements ICommandRpcClientService {
     @Override
     public void savepointForPerYarn(String jobId, String targetDirectory, String yarnAppId) throws Exception {
         String command = commandService.buildSavepointCommandForYarn(jobId, targetDirectory, yarnAppId, PropertyUtils.getString(FLINK_CLIENT_HOME));
-        log.info("[savepointForPerYarn] command={}", command);
+        log.info("savepoint for yarn command：{}", command);
         this.execSavepoint(command);
     }
 
     @Override
     public void savepointForPerCluster(String jobId, String targetDirectory) throws Exception {
         String command = commandService.buildSavepointCommandForCluster(jobId, targetDirectory, PropertyUtils.getString(FLINK_CLIENT_HOME));
-        log.info("[savepointForPerCluster] command：{}", command);
+        log.info("savepoint for per cluster command：{}", command);
         this.execSavepoint(command);
     }
 
     private void execSavepoint(String command) throws Exception {
         Process pcs = Runtime.getRuntime().exec(command);
         //消费正常日志
-        this.clearLogStream(pcs.getInputStream(), String.format("%s-savepoint-success", DateUtil.now()));
+        this.clearLogStream(pcs.getInputStream(), "savepoint success！");
         //消费错误日志
-        this.clearLogStream(pcs.getErrorStream(), String.format("%s-savepoint-error", DateUtil.now()));
+        this.clearLogStream(pcs.getErrorStream(), "savepoint error！");
         int rs = pcs.waitFor();
         if (rs != 0) {
-            throw new Exception("[savepointForPerYarn]执行savepoint失败 is error  rs=" + rs);
+            throw new Exception("执行savepoint失败！");
         }
     }
 
     /**
-     * 清理pcs.waitFor()日志防止死锁
+     * 清理pcs.waitFor()日志
      */
     private void clearLogStream(InputStream stream, final String threadName) {
         WaitForPoolConfigUtil.getInstance().getThreadPoolExecutor().execute(() -> {
                     BufferedReader reader = null;
                     try {
                         Thread.currentThread().setName(threadName);
-                        String result = null;
+                        String result;
                         reader = new BufferedReader(new InputStreamReader(stream, StandardCharsets.UTF_8));
-                        //按行读取
                         while ((result = reader.readLine()) != null) {
                             log.info(result);
                         }
                     } catch (Exception e) {
-                        log.error("threadName={}", threadName);
+                        log.error("threadName：{}", threadName);
                     } finally {
                         this.close(reader, stream, "clearLogStream");
                     }
@@ -96,7 +94,6 @@ public class CommandRpcClientServiceImpl implements ICommandRpcClientService {
      * 启动日志输出并且从日志中获取成功后的jobId
      */
     private String clearInfoLogStream(InputStream stream, DeployModeEnum deployModeEnum) {
-
         String appId = null;
         BufferedReader reader = null;
         try {
@@ -104,35 +101,32 @@ public class CommandRpcClientServiceImpl implements ICommandRpcClientService {
             reader = new BufferedReader(new InputStreamReader(stream, StandardCharsets.UTF_8));
             //按行读取
             while ((result = reader.readLine()) != null) {
-                log.info("read={}", result);
-                if (StringUtils.isEmpty(appId) && result.contains("job-submitted-success:")) {
-                    appId = result.replace("job-submitted-success:", " ").trim();
-                    log.info("[job-submitted-success] 解析得到的appId是 {}  原始数据 :{}", appId, result);
+                log.info("read：{}", result);
+                if (StringUtils.isEmpty(appId) && result.contains("job submitted success:")) {
+                    appId = result.replace("job submitted success:", " ").trim();
+                    log.info("job submitted success，appId： {}，原始数据：{}", appId, result);
                 }
-                if (StringUtils.isEmpty(appId) && result
-                        .contains("Job has been submitted with JobID")) {
-                    appId = result.replace("Job has been submitted with JobID", "")
-                            .trim();
-                    log.info("[Job has been submitted with JobID] 解析得到的appId是 {}  原始数据 :{}", appId, result);
+                if (StringUtils.isEmpty(appId) && result.contains("Job has been submitted with JobID")) {
+                    appId = result.replace("Job has been submitted with JobID", "").trim();
+                    log.info("从日志：{} 中解析到的appId：{}", result, appId);
                 }
             }
 
-            if (DeployModeEnum.YARN_APPLICATION == deployModeEnum
-                    || DeployModeEnum.YARN_PER == deployModeEnum) {
-                log.info("yarn 模式 不需要获取appId");
+            if (DeployModeEnum.YARN_APPLICATION == deployModeEnum || DeployModeEnum.YARN_PER == deployModeEnum) {
+                log.info("yarn 模式不需要解析appId，可以通过rest接口获取！");
             } else {
                 if (StringUtils.isEmpty(appId)) {
-                    throw new RuntimeException("解析appId异常");
+                    throw new RuntimeException("解析appId异常！");
                 }
             }
             FlinkJobBaseService.APPID_THREAD_LOCAL.set(appId);
-            log.info("获取到的appId是 {}", appId);
+            log.info("解析到的appId：{}", appId);
             return appId;
         } catch (CustomException e) {
             throw e;
         } catch (Exception e) {
-            log.error("[clearInfoLogStream] is error", e);
-            throw new RuntimeException("clearInfoLogStream is error");
+            log.error("clearInfoLogStream error", e);
+            throw new RuntimeException("clearInfoLogStream error");
         } finally {
             this.close(reader, stream, "clearInfoLogStream");
         }
@@ -145,14 +139,12 @@ public class CommandRpcClientServiceImpl implements ICommandRpcClientService {
         if (reader != null) {
             try {
                 reader.close();
-                log.info("[{}]关闭reader ", typeName);
             } catch (IOException e) {
                 log.error("[{}] 关闭reader流失败 ", typeName, e);
             }
         }
         if (stream != null) {
             try {
-                log.info("[{}]关闭stream ", typeName);
                 stream.close();
             } catch (IOException e) {
                 log.error("[{}] 关闭stream流失败 ", typeName, e);

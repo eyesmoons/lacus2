@@ -32,8 +32,8 @@ public class SysResourcesEntity extends BaseEntity<SysResourcesEntity> {
     private Integer pid;
 
     @ApiModelProperty("alia name")
-    @TableField("alia_name")
-    private String aliaName;
+    @TableField("name")
+    private String name;
 
     @ApiModelProperty("file name")
     @TableField("file_name")

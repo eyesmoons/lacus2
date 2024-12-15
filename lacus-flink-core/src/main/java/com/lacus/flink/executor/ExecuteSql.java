@@ -1,7 +1,7 @@
-package com.lacus.core.flink.executor;
+package com.lacus.flink.executor;
 
-import com.lacus.core.flink.config.Configurations;
 import com.lacus.core.flink.model.SqlCommandCall;
+import com.lacus.flink.config.Configurations;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.flink.api.common.JobID;
 import org.apache.flink.table.api.StatementSet;
@@ -22,15 +22,11 @@ public class ExecuteSql {
 
     public static JobID exeSql(List<String> sqlList, TableEnvironment tEnv) {
         Parser parser = ((TableEnvironmentInternal) tEnv).getParser();
-
         List<ModifyOperation> modifyOperationList = new ArrayList<>();
-
         for (String stmt : sqlList) {
             Operation operation = parser.parse(stmt).get(0);
             log.info("operation={}", operation.getClass().getSimpleName());
             switch (operation.getClass().getSimpleName()) {
-
-                //显示
                 case "ShowTablesOperation":
                 case "ShowCatalogsOperation":
                 case "ShowCreateTableOperation":
@@ -45,19 +41,15 @@ public class ExecuteSql {
                 case "DescribeTableOperation":
                     tEnv.executeSql(stmt).print();
                     break;
-
-                //set
                 case "SetOperation":
                     SetOperation setOperation = (SetOperation) operation;
                     Configurations.setSingleConfiguration(tEnv, setOperation.getKey().get(), setOperation.getValue().get());
                     break;
-
                 case "BeginStatementSetOperation":
                 case "EndStatementSetOperation":
                     System.out.println("stmt：" + stmt);
                     log.info("stmt：{}", stmt);
                     break;
-
                 case "DropTableOperation":
                 case "DropCatalogFunctionOperation":
                 case "DropTempSystemFunctionOperation":
@@ -86,17 +78,17 @@ public class ExecuteSql {
                     modifyOperationList.add((SinkModifyOperation) operation);
                     break;
                 default:
-                    log.error("不支持此Operation类型  {}", operation.getClass().getSimpleName());
-                    throw new RuntimeException("不支持该语法 sql=" + stmt);
+                    log.error("不支持的Operation类型 {}", operation.getClass().getSimpleName());
+                    throw new RuntimeException("不支持的语法，sql=" + stmt);
             }
         }
+        System.out.println("modifyOperationList=" + modifyOperationList);
         TableResult tableResult = ((TableEnvironmentInternal) tEnv)
                 .executeInternal(modifyOperationList);
         if (tableResult.getJobClient().orElse(null) != null) {
             return tableResult.getJobClient().get().getJobID();
         }
-        throw new RuntimeException("任务运行失败 没有获取到JobID");
-
+        throw new RuntimeException("任务运行失败：获取JobID失败");
     }
 
 
@@ -107,24 +99,21 @@ public class ExecuteSql {
     public static void exeSql(List<SqlCommandCall> sqlCommandCallList, TableEnvironment tEnv, StatementSet statementSet) {
         for (SqlCommandCall sqlCommandCall : sqlCommandCallList) {
             switch (sqlCommandCall.getSqlCommand()) {
-                //配置
                 case SET:
                     Configurations.setSingleConfiguration(tEnv, sqlCommandCall.getOperands()[0],
                             sqlCommandCall.getOperands()[1]);
                     break;
-                //insert 语句
                 case INSERT_INTO:
                 case INSERT_OVERWRITE:
                     statementSet.addInsertSql(sqlCommandCall.getOperands()[0]);
                     break;
-                //显示语句
                 case SELECT:
                 case SHOW_CATALOGS:
                 case SHOW_DATABASES:
                 case SHOW_MODULES:
                 case SHOW_TABLES:
                     break;
-                // 兼容sql-client.sh的用法，只显示但不执行
+                // 兼容sql-client.sh的用法
                 case BEGIN_STATEMENT_SET:
                 case END:
                     break;

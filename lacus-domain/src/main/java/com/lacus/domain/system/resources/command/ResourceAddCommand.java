@@ -22,7 +22,7 @@ public class ResourceAddCommand {
     private Integer type;
 
     @NotBlank(message = "资源名称不能为空")
-    private String aliaName;
+    private String name;
 
     @NotBlank(message = "资源名称不能为空")
     private String fileName;

@@ -24,7 +24,7 @@ public class SysResourcesServiceImpl extends ServiceImpl<SysResourcesMapper, Sys
     @Override
     public List<SysResourcesEntity> listDirectory(ResourceType type) {
         QueryWrapper<SysResourcesEntity> wrapper = new QueryWrapper<>();
-        wrapper.eq("pid", 0);
+        wrapper.eq("is_directory", 1);
         wrapper.eq("type", type.getCode());
         return this.list(wrapper);
     }
@@ -33,6 +33,7 @@ public class SysResourcesServiceImpl extends ServiceImpl<SysResourcesMapper, Sys
     public List<SysResourcesEntity> listResource(ResourceType type, Long pid, String fileName) {
         QueryWrapper<SysResourcesEntity> wrapper = new QueryWrapper<>();
         wrapper.eq("pid", pid);
+        wrapper.eq("is_directory", 0);
         wrapper.eq("type", type.getCode());
         wrapper.like("file_name", fileName);
         return this.list(wrapper);

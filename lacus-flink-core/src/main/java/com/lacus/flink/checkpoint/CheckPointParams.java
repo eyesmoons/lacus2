@@ -1,8 +1,8 @@
-package com.lacus.core.flink.checkpoint;
+package com.lacus.flink.checkpoint;
 
-import com.lacus.core.flink.model.CheckPointParam;
-import com.lacus.enums.CheckPointParameterEnums;
-import com.lacus.enums.StateBackendEnum;
+import com.lacus.flink.enums.CheckPointParameterEnums;
+import com.lacus.flink.enums.StateBackendEnum;
+import com.lacus.flink.model.CheckPointParam;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.flink.api.java.utils.ParameterTool;
@@ -53,7 +53,7 @@ public class CheckPointParams {
         }
         if (StringUtils.isNotEmpty(tolerableCheckpointFailureNumber)) {
             checkPointParam
-                    .setTolerableCheckpointFailureNumber(Integer.valueOf(tolerableCheckpointFailureNumber));
+                    .setTolerableCheckpointFailureNumber(Integer.parseInt(tolerableCheckpointFailureNumber));
         }
         if (StringUtils.isNotEmpty(externalizedCheckpointCleanup)) {
             checkPointParam.setExternalizedCheckpointCleanup(externalizedCheckpointCleanup);

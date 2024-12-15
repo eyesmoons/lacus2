@@ -312,8 +312,8 @@ public class HdfsUtil {
 
     public static void main(String[] args) {
         conf = new Configuration();
-        System.setProperty("HADOOP_USER_NAME", "hdfs");
-        conf.set("fs.defaultFS", "hdfs://xxx:8020");
+        System.setProperty("HADOOP_USER_NAME", "casey");
+        conf.set("fs.defaultFS", "hdfs://hadoop1:9000");
         FileStatus[] listPaths = HdfsUtil.listPaths("/flink/libs/ext/");
         System.out.println(Arrays.toString(listPaths));
     }

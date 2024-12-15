@@ -1,6 +1,6 @@
-package com.lacus.core.flink.model;
+package com.lacus.flink.model;
 
-import com.lacus.enums.StateBackendEnum;
+import com.lacus.flink.enums.StateBackendEnum;
 import lombok.Data;
 
 @Data

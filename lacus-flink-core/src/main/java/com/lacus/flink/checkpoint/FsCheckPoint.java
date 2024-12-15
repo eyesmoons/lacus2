@@ -1,6 +1,6 @@
-package com.lacus.core.flink.checkpoint;
+package com.lacus.flink.checkpoint;
 
-import com.lacus.core.flink.model.CheckPointParam;
+import com.lacus.flink.model.CheckPointParam;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.flink.contrib.streaming.state.RocksDBStateBackend;

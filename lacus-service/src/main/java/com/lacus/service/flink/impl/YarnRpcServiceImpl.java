@@ -30,7 +30,7 @@ public class YarnRpcServiceImpl implements IYarnRpcService {
     @Override
     public String getAppIdByYarn(String jobName, String queueName) {
         if (StringUtils.isEmpty(jobName)) {
-            throw new CustomException("任务名称为空");
+            throw new CustomException("任务名称为空！");
         }
         String url = getYarnRmHttpAddress() + "ws/v1/cluster/apps?queue=" + queueName;
         String res = restUtil.getForString(url);
@@ -41,14 +41,14 @@ public class YarnRpcServiceImpl implements IYarnRpcService {
         for (AppTO appTO : yarnAppInfo.getApps().getApp()) {
             if (jobName.equals(appTO.getName())) {
                 if (FlinkStatusEnum.RUNNING.name().equals(appTO.getState())) {
-                    log.info("任务信息 appTO：{}", appTO);
+                    log.info("任务信息：{}", appTO);
                     return appTO.getId();
                 } else {
                     log.error("任务运行状态失败，状态为： {}", appTO.getState());
                 }
             }
         }
-        throw new CustomException("yarn队列" + queueName + "中没有找到运行的任务 name：" + jobName);
+        throw new CustomException("yarn队列" + queueName + "中没有找到运行的任务，jobName：" + jobName);
     }
 
     public String getYarnRmHttpAddress() {
@@ -73,10 +73,10 @@ public class YarnRpcServiceImpl implements IYarnRpcService {
                     }
                 }
             } catch (Exception e) {
-                log.error("单个http异常={}", http, e);
+                log.error("http请求异常：{}", http, e);
             }
         }
-        throw new CustomException("网络异常 url=" + urlHa);
+        throw new CustomException("网络异常：" + urlHa);
     }
 
     @Override
@@ -101,7 +101,7 @@ public class YarnRpcServiceImpl implements IYarnRpcService {
         String url = getYarnRmHttpAddress() + "ws/v1/cluster/apps/" + appId + "/state";
         String res = restUtil.getForString(url);
         if (StringUtils.isEmpty(res)) {
-            throw new CustomException("请求失败:返回结果为空 url: " + url);
+            throw new CustomException("请求失败，返回结果为空：" + url);
         }
         return FlinkStatusEnum.getFlinkStateEnum(String.valueOf(JSON.parseObject(res).get("state")));
     }
@@ -125,7 +125,7 @@ public class YarnRpcServiceImpl implements IYarnRpcService {
             jobInfo.setStatus((String) jsonObject.get("status"));
             return jobInfo;
         } catch (Exception e) {
-            log.error("[getJobInfoForPerYarnByAppId]出错  ", e);
+            log.error("get jobInfo for yarn-per-job by appid出错  ", e);
         }
         return null;
     }
@@ -138,20 +138,19 @@ public class YarnRpcServiceImpl implements IYarnRpcService {
 
         String url = getYarnRmHttpAddress() + "/proxy/" + appId + "/jobs/yarn-cancel";
         String res = restUtil.getForString(url);
-        log.info("[cancelJobByAppId]请求结果: res：{}", res);
+        log.info("cancel job by appId请求结果：{}", res);
     }
 
 
     @Override
     public String getSavepointPath(String appId, String jobId) {
-
         if (StringUtils.isEmpty(appId) || StringUtils.isEmpty(jobId)) {
             throw new CustomException("appId为空");
         }
 
         String url = getYarnRmHttpAddress() + "/proxy/" + appId + "/jobs/" + jobId + "/checkpoints";
         String res = restUtil.getForString(url);
-        log.info("[getSavepointPath]请求结果: res：{}", res);
+        log.info("get savepoint path请求结果: res：{}", res);
         if (StringUtils.isEmpty(res)) {
             return null;
         }
@@ -175,7 +174,7 @@ public class YarnRpcServiceImpl implements IYarnRpcService {
         if (yarnAppInfo.getApps() == null) {
             throw new CustomException("yarn队列[" + queueName + "]中没有找到运行的任务：" + jobName);
         }
-        if (yarnAppInfo.getApps().getApp() == null || yarnAppInfo.getApps().getApp().size() <= 0) {
+        if (yarnAppInfo.getApps().getApp() == null || yarnAppInfo.getApps().getApp().isEmpty()) {
             throw new CustomException("yarn队列[" + queueName + "]中没有找到运行的任务：" + jobName);
         }
     }

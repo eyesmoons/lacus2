@@ -58,14 +58,19 @@ public class ResourceService {
     @Autowired
     private ISysResourcesService sysResourcesService;
 
-    public void createDirectory(String aliaName, ResourceType type, String currentDir) {
-        if (FileUtil.directoryTraversal(aliaName)) {
-            log.warn("Parameter name is invalid, name:{}.", RegexUtils.escapeNRT(aliaName));
+    public void createDirectory(Long pid, String name, ResourceType type) {
+        if (FileUtil.directoryTraversal(name)) {
+            log.warn("Parameter name is invalid, name:{}.", RegexUtils.escapeNRT(name));
             throw new CustomException(Status.VERIFY_PARAMETER_NAME_FAILED.getMsg(), Status.VERIFY_PARAMETER_NAME_FAILED.getCode());
         }
 
-        String userResRootPath = ResourceType.UDF.equals(type) ? storageOperate.getUdfDir() : storageOperate.getResDir();
-        String fullName = !currentDir.contains(userResRootPath) ? userResRootPath + aliaName : currentDir + aliaName;
+        SysResourcesEntity pResource = sysResourcesService.getById(pid);
+        String fullName;
+        if (ObjectUtils.isEmpty(pResource)) {
+            fullName = "/" + name;
+        } else {
+            fullName = pResource.getFilePath() + File.separator + name;
+        }
 
         try {
             if (checkResourceExists(fullName)) {
@@ -80,14 +85,16 @@ public class ResourceService {
         // create directory in hdfs
         createDirectory(fullName, type);
         // save to db
-        addResource(0L, aliaName, fullName, 1);
+        addResource(pid, name, fullName, 1);
     }
 
-    public void uploadResource(Long pid, String aliaName, ResourceType type, MultipartFile file, String currentDir) {
+    public void uploadResource(Long pid, String aliaName, ResourceType type, MultipartFile file) {
         verifyFile(aliaName, type, file);
 
         // check resource name exists
         String userResRootPath = ResourceType.UDF.equals(type) ? storageOperate.getUdfDir() : storageOperate.getResDir();
+        SysResourcesEntity pResource = sysResourcesService.getById(pid);
+        String currentDir = ObjectUtils.isEmpty(pResource) ? userResRootPath : pResource.getFilePath();
         String currDirNFileName = !currentDir.contains(userResRootPath) ? userResRootPath + aliaName : currentDir + aliaName;
 
         try {
@@ -146,9 +153,8 @@ public class ResourceService {
     }
 
     public PageDTO queryResourceListPaging(ResourceQuery query) {
-        Page<SysEnvEntity> page = sysResourcesService.page(query.toPage(), query.toQueryWrapper());
-        List<EnvDTO> records = page.getRecords().stream().map(EnvDTO::new).collect(Collectors.toList());
-        return new PageDTO(records, page.getTotal());
+        Page<SysResourcesEntity> page = sysResourcesService.page(query.toPage(), query.toQueryWrapper());
+        return new PageDTO(page.getRecords(), page.getTotal());
     }
 
     public void deleteResource(long id) throws IOException {
@@ -205,9 +211,9 @@ public class ResourceService {
         }
     }
 
-    private static void addResource(Long pid, String aliaName, String fullName, Integer isDirectory) {
+    private static void addResource(Long pid, String name, String fullName, Integer isDirectory) {
         String fileName = new File(fullName).getName();
-        ResourceAddCommand command = new ResourceAddCommand(pid, 0, aliaName, fileName, fullName, isDirectory);
+        ResourceAddCommand command = new ResourceAddCommand(pid, 0, name, fileName, fullName, isDirectory);
         ResourceModel model = ResourceModelFactory.loadFromAddCommand(command, new ResourceModel());
         model.insert();
     }
