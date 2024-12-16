@@ -33,6 +33,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
@@ -199,10 +200,8 @@ public class ResourceService {
             throw new CustomException(Status.RESOURCE_NOT_EXIST.getMsg());
         }
         List<String> allChildren = storageOperate.listFilesStatusRecursively(byId.getFilePath(), defaultPath, resource.getType()).stream().map(StorageEntity::getFullName).collect(Collectors.toList());
-        // if resource type is UDF,need check whether it is bound by UDF function
         // delete file on hdfs
         storageOperate.delete(byId.getFilePath(), allChildren, true);
-
         // delete from db
         sysResourcesService.removeById(id);
     }
@@ -359,4 +358,32 @@ public class ResourceService {
         return resourcesList;
     }
 
+    public String readResource(Long id) {
+        SysResourcesEntity resource = sysResourcesService.getById(id);
+        if (resource == null) {
+            throw new CustomException(Status.RESOURCE_NOT_EXIST.getMsg(), Status.RESOURCE_NOT_EXIST.getCode());
+        }
+        String fullName = storageOperate.getHdfsPath() + resource.getFilePath();
+        // check preview or not by file suffix
+        String nameSuffix = Files.getFileExtension(fullName);
+        String resourceViewSuffixes = FileUtil.getResourceViewSuffixes();
+        if (StringUtils.isNotEmpty(resourceViewSuffixes)) {
+            List<String> strList = Arrays.asList(resourceViewSuffixes.split(","));
+            if (!strList.contains(nameSuffix)) {
+                throw new CustomException("[" + fullName + "]不支持的文件后缀：" + nameSuffix);
+            }
+        }
+        List<String> content;
+        try {
+            if (storageOperate.exists(fullName)) {
+                content = storageOperate.vimFile(fullName, 0, 100);
+            } else {
+                log.error("read file {} does not exist in storage", fullName);
+                return null;
+            }
+        } catch (Exception e) {
+            throw new CustomException("Resource " + fullName + " read failed");
+        }
+        return String.join("\n", content);
+    }
 }

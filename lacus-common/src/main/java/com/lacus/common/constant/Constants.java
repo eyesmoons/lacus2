@@ -70,7 +70,7 @@ public class Constants {
     public static final String RESOURCE_UPLOAD_PATH = "resource.storage.upload.base.path";
     public static final String DATA_BASEDIR_PATH = "data.basedir.path";
     public static final String RESOURCE_VIEW_SUFFIXES = "resource.view.suffixs";
-    public static final String RESOURCE_VIEW_SUFFIXES_DEFAULT_VALUE = "txt,log,sh,bat,conf,cfg,py,java,sql,xml,hql,properties,json,yml,yaml,ini,js";
+    public static final String RESOURCE_VIEW_SUFFIXES_DEFAULT_VALUE = "txt,log,sh,bat,conf,cfg,py,java,sql,xml,hql,properties,json,yml,yaml,ini,js,csv,md";
     public static final String SUDO_ENABLE = "sudo.enable";
     public static final String RESOURCE_STORAGE_TYPE = "resource.storage.type";
     public static final String COMMA = ",";

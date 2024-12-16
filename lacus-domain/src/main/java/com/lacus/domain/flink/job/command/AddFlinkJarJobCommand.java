@@ -2,6 +2,7 @@ package com.lacus.domain.flink.job.command;
 
 import lombok.Data;
 
+import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotEmpty;
 
 /**
@@ -11,21 +12,21 @@ import javax.validation.constraints.NotEmpty;
 @Data
 public class AddFlinkJarJobCommand extends CommonFlinkRunCommand {
 
-    @NotEmpty(message = "任务名称不能为空")
+    @NotBlank(message = "任务名称不能为空")
     private String jobName;
 
-    @NotEmpty(message = "任务类型不能为空")
+    @NotBlank(message = "任务类型不能为空")
     private String jobType;
 
-    @NotEmpty(message = "部署模式不能为空")
+    @NotBlank(message = "部署模式不能为空")
     private String deployMode;
 
-    @NotEmpty(message = "主类jar包不能为空")
+    @NotBlank(message = "主类jar包不能为空")
     private String mainJarPath;
 
     private String extJarPath;
 
-    @NotEmpty(message = "主类名不能为空")
+    @NotBlank(message = "主类名不能为空")
     private String mainClass;
 
     private String flinkRunConfig;

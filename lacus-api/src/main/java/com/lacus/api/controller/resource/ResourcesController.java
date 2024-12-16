@@ -61,7 +61,7 @@ public class ResourcesController extends BaseController {
 
     @ApiOperation("文件列表")
     @GetMapping(value = "/file/list")
-    public ResponseDTO<?> queryResourceList(@RequestParam(value = "pid") Long pid, @RequestParam(value = "fileName") String fileName) {
+    public ResponseDTO<?> queryResourceList(@RequestParam(value = "pid", required = false) Long pid, @RequestParam(value = "fileName", required = false) String fileName) {
         return ResponseDTO.ok(resourceService.queryResourceList(ResourceType.FILE, pid, fileName, 0));
     }
 
@@ -105,5 +105,11 @@ public class ResourcesController extends BaseController {
                 .ok()
                 .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + file.getFilename() + "\"")
                 .body(file);
+    }
+
+    @ApiOperation("预览文件")
+    @GetMapping(value = "/view/{id}")
+    public ResponseDTO<?> viewResource(@PathVariable("id") Long id) {
+        return ResponseDTO.ok(resourceService.readResource(id));
     }
 }
