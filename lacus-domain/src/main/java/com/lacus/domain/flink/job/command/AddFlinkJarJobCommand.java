@@ -1,15 +1,14 @@
 package com.lacus.domain.flink.job.command;
 
 import lombok.Data;
-import lombok.EqualsAndHashCode;
 
 import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
 
 /**
  * @author shengyu
  * @date 2024/9/13 17:54
  */
-@EqualsAndHashCode(callSuper = true)
 @Data
 public class AddFlinkJarJobCommand extends CommonFlinkRunCommand {
 
@@ -22,8 +21,8 @@ public class AddFlinkJarJobCommand extends CommonFlinkRunCommand {
     @NotBlank(message = "部署模式不能为空")
     private String deployMode;
 
-    @NotBlank(message = "主类jar包不能为空")
-    private String mainJarPath;
+    @NotNull(message = "主类jar包不能为空")
+    private Long mainJarPath;
 
     private String extJarPath;
 

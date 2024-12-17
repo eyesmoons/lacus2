@@ -38,7 +38,7 @@ public class FlinkJobService {
         return new PageDTO(page.getRecords(), page.getTotal());
     }
 
-    public FlinkJobModel addFlinkSqlJob(@Valid AddFlinkSqlJobCommand addCommand) {
+    public FlinkJobModel addFlinkSqlJob(AddFlinkSqlJobCommand addCommand) {
         FlinkJobModel model = FlinkJobModelFactory.loadFromSqlAddCommand(addCommand, new FlinkJobModel());
         String flinkRunConfig = getFlinkRunConfig(addCommand, model);
         model.setFlinkRunConfig(flinkRunConfig);
@@ -57,7 +57,7 @@ public class FlinkJobService {
                 " -p " + addCommand.getParallelism();
     }
 
-    public FlinkJobModel addFlinkJarJob(@Valid AddFlinkJarJobCommand addCommand) {
+    public FlinkJobModel addFlinkJarJob(AddFlinkJarJobCommand addCommand) {
         FlinkJobModel model = FlinkJobModelFactory.loadFromJarAddCommand(addCommand, new FlinkJobModel());
         model.checkJobNameUnique(flinkJobService);
         String flinkRunConfig = " -ys " + addCommand.getSlot() +
