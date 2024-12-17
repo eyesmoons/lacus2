@@ -62,7 +62,7 @@ public class ResourcesController extends BaseController {
     @ApiOperation("文件列表")
     @GetMapping(value = "/file/list")
     public ResponseDTO<?> queryResourceList(@RequestParam(value = "pid", required = false) Long pid, @RequestParam(value = "fileName", required = false) String fileName) {
-        return ResponseDTO.ok(resourceService.queryResourceList(ResourceType.FILE, pid, fileName, 0));
+        return ResponseDTO.ok(resourceService.queryAllResources(pid));
     }
 
     @ApiOperation("文件列表分页")

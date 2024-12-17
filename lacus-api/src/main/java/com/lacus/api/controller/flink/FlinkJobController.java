@@ -63,7 +63,7 @@ public class FlinkJobController {
 
     @ApiOperation("新建flink jar任务")
     @PostMapping("/jar")
-    public ResponseDTO<?> addFlinkJarJob(@RequestBody @Valid AddFlinkJarJobCommand addCommand) {
+    public ResponseDTO<?> addFlinkJarJob(@RequestBody AddFlinkJarJobCommand addCommand) {
         addCommand.setJobType(FlinkJobTypeEnum.JAR.name());
         return ResponseDTO.ok(flinkJobService.addFlinkJarJob(addCommand));
     }

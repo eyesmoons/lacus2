@@ -64,6 +64,7 @@ public class YarnFlinkOperationServerImpl implements IFlinkOperationService {
         // 3、保存任务实例
         FlinkJobInstanceEntity instance = new FlinkJobInstanceEntity();
         instance.setJobId(jobId);
+        instance.setDeployMode(flinkJobEntity.getDeployMode());
         instance.setInstanceName(flinkJobEntity.getJobName() + "_" + System.currentTimeMillis());
         instance.setStatus(FlinkStatusEnum.RUNNING);
         instance.setSubmitTime(DateUtils.getNowDate());

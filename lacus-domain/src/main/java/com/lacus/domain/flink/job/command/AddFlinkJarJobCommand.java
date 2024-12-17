@@ -1,14 +1,15 @@
 package com.lacus.domain.flink.job.command;
 
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 
 import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.NotEmpty;
 
 /**
  * @author shengyu
  * @date 2024/9/13 17:54
  */
+@EqualsAndHashCode(callSuper = true)
 @Data
 public class AddFlinkJarJobCommand extends CommonFlinkRunCommand {
 
@@ -27,7 +28,7 @@ public class AddFlinkJarJobCommand extends CommonFlinkRunCommand {
     private String extJarPath;
 
     @NotBlank(message = "主类名不能为空")
-    private String mainClass;
+    private String mainClassName;
 
     private String flinkRunConfig;
 

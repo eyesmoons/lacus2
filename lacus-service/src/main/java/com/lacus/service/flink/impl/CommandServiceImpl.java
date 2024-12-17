@@ -69,7 +69,7 @@ public class CommandServiceImpl implements ICommandService {
                 command.append(" -type ").append(flinkJobEntity.getJobType());
                 break;
             case JAR:
-                command.append(" -c ").append(flinkJobEntity.getMainClass());
+                command.append(" -c ").append(flinkJobEntity.getMainClassName());
                 command.append(" ").append(jobRunParamDTO.getMainJarPath());
                 command.append(" ").append(flinkJobEntity.getCustomArgs());
                 break;
@@ -125,7 +125,7 @@ public class CommandServiceImpl implements ICommandService {
                 command.append(" -type ").append(flinkJobEntity.getJobType());
                 break;
             case JAR:
-                command.append(" -c ").append(flinkJobEntity.getMainClass());
+                command.append(" -c ").append(flinkJobEntity.getMainClassName());
                 command.append(" ").append(jobRunParamDTO.getMainJarPath());
                 command.append(" ").append(flinkJobEntity.getCustomArgs());
                 break;

@@ -71,6 +71,7 @@ public class StandaloneFlinkOperationServerImpl implements IFlinkOperationServic
         // 3、保存任务实例
         FlinkJobInstanceEntity instance = new FlinkJobInstanceEntity();
         instance.setJobId(jobId);
+        instance.setDeployMode(byId.getDeployMode());
         instance.setInstanceName(byId.getJobName() + "_" + System.currentTimeMillis());
         instance.setStatus(FlinkStatusEnum.RUNNING);
         instance.setSubmitTime(DateUtils.getNowDate());

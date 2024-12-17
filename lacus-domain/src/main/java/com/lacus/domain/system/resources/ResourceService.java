@@ -37,6 +37,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 import static com.lacus.common.constant.Constants.JAR;
@@ -153,6 +154,12 @@ public class ResourceService {
     public PageDTO queryResourceListPaging(ResourceQuery query) {
         Page<SysResourcesEntity> page = sysResourcesService.page(query.toPage(), query.toQueryWrapper());
         return new PageDTO(page.getRecords(), page.getTotal());
+    }
+
+    public List<SysResourcesEntity> queryAllResources(Long pid) {
+        List<SysResourcesEntity> allResources = new ArrayList<>();
+        findAllResourcesRecursively(pid, allResources);
+        return allResources;
     }
 
     public PageDTO queryAllResourcesPaging(ResourceQuery query) {

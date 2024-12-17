@@ -5,6 +5,7 @@ import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import com.lacus.common.core.base.BaseEntity;
+import com.lacus.enums.DeployModeEnum;
 import com.lacus.enums.FlinkStatusEnum;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -25,6 +26,9 @@ public class FlinkJobInstanceEntity extends BaseEntity<FlinkJobInstanceEntity> {
 
     @TableField("job_id")
     private Long jobId;
+
+    @TableField("deploy_mode")
+    private DeployModeEnum deployMode;
 
     @TableField("instance_name")
     private String instanceName;
@@ -49,4 +53,10 @@ public class FlinkJobInstanceEntity extends BaseEntity<FlinkJobInstanceEntity> {
 
     @TableField("status")
     private FlinkStatusEnum status;
+
+    @TableField(exist = false)
+    private String jobName;
+
+    @TableField(exist = false)
+    private String jobType;
 }

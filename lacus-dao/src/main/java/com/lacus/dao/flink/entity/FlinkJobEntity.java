@@ -47,8 +47,8 @@ public class FlinkJobEntity extends BaseEntity<FlinkJobEntity> {
     @TableField("ext_jar_path")
     private String extJarPath;
 
-    @TableField("main_class")
-    private String mainClass;
+    @TableField("main_class_name")
+    private String mainClassName;
 
     @TableField("flink_run_config")
     private String flinkRunConfig;
