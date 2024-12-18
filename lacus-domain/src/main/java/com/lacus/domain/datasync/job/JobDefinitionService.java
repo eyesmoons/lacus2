@@ -505,6 +505,10 @@ public class JobDefinitionService {
 
     public MappedColumnDTO listMappedColumn(MappedColumnQuery query) {
         String sourceTableName = query.getSourceTableName();
+        if (sourceTableName.contains(".")) {
+            String[] sourceTableNameArr = sourceTableName.split("\\.");
+            sourceTableName = sourceTableNameArr[1];
+        }
         Long jobId = query.getJobId();
         MappedColumnDTO result = new MappedColumnDTO();
         LinkedList<ColumnDTO> sourceColumns = new LinkedList<>();
@@ -517,7 +521,7 @@ public class JobDefinitionService {
             tpl.setJobId(jobId);
             tpl.setSourceDatasourceId(query.getSourceDatasourceId());
             tpl.setSourceDbName(query.getSourceDbName());
-            tpl.setSourceTableName(query.getSourceTableName());
+            tpl.setSourceTableName(sourceTableName);
             tpl.setSinkDatasourceId(query.getSinkDatasourceId());
             tpl.setSinkDbName(query.getSinkDbName());
             tpl.setSinkTableName(query.getSinkTableName());
@@ -561,7 +565,7 @@ public class JobDefinitionService {
             List<MetaColumnEntity> sourceMetaColumns = metaColumnService.getColumnsByTableName(query.getSourceDatasourceId(), query.getSourceDbName(), sourceTableName);
             for (MetaColumnEntity sourceMetaColumn : sourceMetaColumns) {
                 // 输入源填充元数据信息
-                fillMetaColumn(sourceColumns, query.getSourceDatasourceId(), query.getSourceDbName(), query.getSourceTableName(), sourceMetaColumn.getColumnName(), sourceMetaColumn);
+                fillMetaColumn(sourceColumns, query.getSourceDatasourceId(), query.getSourceDbName(), sourceTableName, sourceMetaColumn.getColumnName(), sourceMetaColumn);
                 // 输出字段信息设置为空
                 sinkColumns.add(new ColumnDTO());
             }
@@ -702,9 +706,13 @@ public class JobDefinitionService {
         }
 
         for (TableMapping tableMapping : tableMappings) {
+            String sourceTableName1 = tableMapping.getSourceTableName();
+            if (sourceTableName1.contains(".")) {
+                sourceTableName1 = sourceTableName1.split("\\.")[1];
+            }
             MappedTableQuery mappedTableQuery = new MappedTableQuery();
             mappedTableQuery.setSourceDbName(query.getSourceDbName());
-            mappedTableQuery.setSourceTableName(tableMapping.getSourceTableName());
+            mappedTableQuery.setSourceTableName(sourceTableName1);
             mappedTableQuery.setSinkDbName(query.getSinkDbName());
             mappedTableQuery.setSinkTableName(tableMapping.getSinkTableName());
             List<DataSyncSavedColumn> savedColumnList = savedColumnsMap.get(mappedTableQuery);
@@ -712,7 +720,7 @@ public class JobDefinitionService {
             List<MetaColumnEntity> sinkColumns = tableMapping.getSinkColumns();
 
             TableMapping resultBean = new TableMapping();
-            resultBean.setSourceTableName(tableMapping.getSourceTableName());
+            resultBean.setSourceTableName(sourceTableName1);
             resultBean.setSinkTableName(tableMapping.getSinkTableName());
             if (ObjectUtils.isNotEmpty(sourceColumns) && ObjectUtils.isNotEmpty(sinkColumns)) {
                 resultBean.setSourceColumns(sourceColumns);
