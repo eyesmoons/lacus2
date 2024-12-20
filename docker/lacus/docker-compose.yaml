@@ -1,0 +1,76 @@
+version: "v2"
+  
+services:
+  lacus_backend:
+    image: eyesmoons/lacus-backend:1.0.0
+    container_name: lacus_backend
+    restart: always
+    ports:
+      - "8090:8090"
+    networks:
+      - backend
+    volumes:
+      - ./data:/data
+    depends_on:
+      - my_redis
+      - my_mysql
+    environment:
+      - TZ=Asia/Shanghai
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8090/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  my_redis:
+    image: redis:7.4.1-alpine
+    container_name: my_redis
+    restart: on-failure
+    environment:
+      - TZ=Asia/Shanghai
+    ports:
+      - "16379:16379"
+    networks:
+      - backend
+    volumes:
+      - ./redis/redis.conf:/usr/local/etc/redis/redis.conf
+      - ./redis/redis-data:/data
+    command: redis-server /usr/local/etc/redis/redis.conf
+    privileged: true
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  my_mysql:
+    image: mysql:8.0
+    container_name: my_mysql
+    restart: always
+    environment:
+      - MYSQL_ROOT_PASSWORD=123456
+      - MYSQL_DATABASE=lacus
+      - MYSQL_USER=shengyu
+      - MYSQL_PASSWORD=123456
+      - TZ=Asia/Shanghai
+    ports:
+       - "31306:3306"
+    volumes:
+      - ./mysql/data:/var/lib/mysql
+      - ./mysql/conf:/etc/mysql/conf.d
+      - ./mysql/init:/docker-entrypoint-initdb.d
+    networks:
+      - backend
+    command: 
+      --default-authentication-plugin=mysql_native_password
+      --character-set-server=utf8mb4
+      --collation-server=utf8mb4_general_ci
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+networks:
+  backend:
+    driver: bridge

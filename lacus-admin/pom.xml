@@ -22,13 +22,6 @@
             <version>1.26</version>
         </dependency>
 
-        <!-- api 模块 -->
-        <dependency>
-            <groupId>com.lacus</groupId>
-            <artifactId>lacus-api</artifactId>
-            <version>1.0.0</version>
-        </dependency>
-
         <!-- 核心模块-->
         <dependency>
             <groupId>com.lacus</groupId>

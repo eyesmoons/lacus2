@@ -383,7 +383,7 @@ public class ResourceService {
         List<String> content;
         try {
             if (storageOperate.exists(fullName)) {
-                content = storageOperate.vimFile(fullName, 0, 100);
+                content = storageOperate.vimFile(fullName, 0, 10000);
             } else {
                 log.error("read file {} does not exist in storage", fullName);
                 return null;

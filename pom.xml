@@ -286,7 +286,6 @@
         <module>lacus-dao</module>
         <module>lacus-service</module>
         <module>lacus-dist</module>
-        <module>lacus-api</module>
     </modules>
     <packaging>pom</packaging>
 

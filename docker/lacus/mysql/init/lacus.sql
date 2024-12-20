@@ -618,6 +618,9 @@ INSERT INTO lacus.sys_menu
 VALUES(62, '单条强退', 13, 3, '#', '', '', 0, 1, 3, 1, 1, 'monitor:online:forceLogout', '#', 0, '2022-05-21 08:30:54', NULL, NULL, '', 0);
 INSERT INTO lacus.sys_menu
 (menu_id, menu_name, parent_id, order_num, `path`, component, query, is_external, is_cache, menu_type, is_visible, status, perms, icon, creator_id, create_time, updater_id, update_time, remark, deleted)
+VALUES(2007, 'demo', 1, 1, 'demo', 'system/demo/index', NULL, 0, 0, 2, 1, 1, 'system:demo:list', '#', 1, '2023-02-17 16:23:41', 1, '2023-02-17 16:25:00', '', 1);
+INSERT INTO lacus.sys_menu
+(menu_id, menu_name, parent_id, order_num, `path`, component, query, is_external, is_cache, menu_type, is_visible, status, perms, icon, creator_id, create_time, updater_id, update_time, remark, deleted)
 VALUES(2009, '元数据', 0, 1, 'metadata', NULL, NULL, 0, 0, 1, 1, 1, NULL, 'redis', 1, '2023-04-20 18:11:10', 1, '2024-05-02 17:56:30', '', 0);
 INSERT INTO lacus.sys_menu
 (menu_id, menu_name, parent_id, order_num, `path`, component, query, is_external, is_cache, menu_type, is_visible, status, perms, icon, creator_id, create_time, updater_id, update_time, remark, deleted)
@@ -691,15 +694,7 @@ VALUES(2032, '消息中心', 0, 6, 'message', NULL, NULL, 0, 0, 1, 1, 1, NULL, '
 INSERT INTO lacus.sys_menu
 (menu_id, menu_name, parent_id, order_num, `path`, component, query, is_external, is_cache, menu_type, is_visible, status, perms, icon, creator_id, create_time, updater_id, update_time, remark, deleted)
 VALUES(2033, '配置中心', 0, 3, 'config', NULL, NULL, 0, 0, 1, 1, 1, NULL, 'system', 1, '2024-05-02 17:54:44', 1, '2024-05-02 17:56:49', '', 0);
-INSERT INTO lacus.sys_menu
-(menu_id,menu_name, parent_id, order_num, `path`, component, query, is_external, is_cache, menu_type, is_visible, status, perms, icon, creator_id, create_time, updater_id, update_time, remark, deleted)
-VALUES (2035,'flink开发', 0, 3, 'flink', NULL, NULL, 0, 0, 1, 1, 1, NULL, 'example', 1, '2024-12-08 10:53:47', 1, '2024-12-08 13:17:37', '', 0);
-INSERT INTO lacus.sys_menu
-(menu_id,menu_name, parent_id, order_num, `path`, component, query, is_external, is_cache, menu_type, is_visible, status, perms, icon, creator_id, create_time, updater_id, update_time, remark, deleted)
-VALUES (2036,'任务定义', 2035, 1, 'flink', 'flink/job/index', NULL, 0, 0, 2, 1, 1, 'flink:job:list', 'cascader', 1, '2024-12-08 11:51:52', 1, '2024-12-08 13:17:22', '', 0);
-INSERT INTO lacus.sys_menu
-(menu_id,menu_name, parent_id, order_num, `path`, component, query, is_external, is_cache, menu_type, is_visible, status, perms, icon, creator_id, create_time, updater_id, update_time, remark, deleted)
-VALUES (2038,'任务实例', 2035, 2, 'instance', 'flink/instance/index', NULL, 0, 0, 2, 1, 1, 'flink:job:list', 'button', 1, '2024-12-17 21:14:41', 1, '2024-12-17 21:18:13', '', 0);
+COMMIT;
 
 -- ----------------------------
 -- Table structure for sys_notice

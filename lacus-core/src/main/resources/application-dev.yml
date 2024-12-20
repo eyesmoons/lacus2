@@ -6,7 +6,7 @@ spring:
         druid:
             # 主库数据源
             master:
-                url: jdbc:mysql://localhost:3306/lacus?useUnicode=true&characterEncoding=utf8&zeroDateTimeBehavior=convertToNull&useSSL=true&serverTimezone=GMT%2B8
+                url: jdbc:mysql://my_mysql:3306/lacus?useUnicode=true&characterEncoding=utf8&zeroDateTimeBehavior=convertToNull&useSSL=true&serverTimezone=GMT%2B8
                 username: shengyu
                 password: 123456
             # 从库数据源
@@ -58,9 +58,9 @@ spring:
     # redis 配置
     redis:
         # 地址
-        host: localhost
+        host: my_redis
         # 端口，默认为6379
-        port: 6379
+        port: 16379
         # 数据库索引
         database: 0
         # 密码
