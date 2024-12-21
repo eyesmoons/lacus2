@@ -19,7 +19,7 @@ import static com.lacus.common.constant.Constants.FLINK_STREAMING_JARVERSION;
 @Service
 @Slf4j
 public class CommandServiceImpl implements ICommandService {
-    private static final String APP_CLASS_NAME = "com.lacus.flink.FlinkBatchJobApplication";
+    private static final String APP_CLASS_NAME = "com.lacus.flink.FlinkSqlJobApplication";
 
     @Autowired
     private ISysEnvService envService;
