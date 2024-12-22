@@ -25,32 +25,28 @@
 ### 一、系统截图
 - 登录
 ![登录](images/lacus_login.png)
+- 首页
+![首页](images/index-1.png)
+![首页](images/index-2.png)
 - 元数据-数据源类型
 ![元数据-数据源类型](images/datasourceType.png)
-- 元数据-数据源定义列表
-![元数据-数据源定义列表](images/datasource.png)
-- 元数据-新增数据源
-![元数据-新增数据源](images/datasource_add.png)
-- 元数据-数据表查询列表
-![元数据-数据表查询列表](images/datasource_table-query.png)
-- 元数据-数据表详情
-![元数据-数据表详情](images/datasource_table-detail.png)
-- 数据同步-任务分组列表
-![数据同步-任务分组列表](images/job-catalog.png)
-- 数据同步-任务定义列表
-![数据同步-任务定义列表](images/job-list.png)
-- 数据同步-启动任务
-![数据同步-启动任务](images/job-start.png)
-- 数据同步-输入源配置
-![数据同步-输入源配置](images/job-source.png)
-- 数据同步-表映射关系配置
-![数据同步-表映射关系配置](images/job-table-mappings.png)
-- 数据同步-字段映射关系配置
-![数据同步-字段映射关系配置](images/job-mapping-columns.png)
-- 数据同步-任务参数配置
-![数据同步-任务参数配置](images/job-params.png)
+- 元数据-数据源定义
+![元数据-数据源定义](images/datasource.png)
+- 元数据-数据表查询
+![元数据-数据表查询](images/datasource_table-query.png)
+- 数据采集-任务分组
+![数据采集-任务分组](images/job-catalog.png)
+- 数据采集-任务定义
+![数据采集-任务定义](images/job-list.png)
+- flink开发-任务定义
+![flink开发-任务定义](images/flink-job-define.png)
+- ![flink开发-任务定义](images/flink-job-edit.png)
+- flink开发-任务实例
+![flink开发-任务实例](images/flink-job-instance.png)
 - 配置中心-环境管理
 ![配置中心-环境管理](images/system-env-config.png)
+- 配置中心-资源管理
+![配置中心-资源管理](images/system-resource.png)
 ### 二、开发环境
 
 - JDK

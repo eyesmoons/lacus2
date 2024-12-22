@@ -55,7 +55,7 @@ CREATE TABLE `data_sync_job` (
   `updater_id` varchar(128) DEFAULT NULL COMMENT '修改人',
   `update_time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
   PRIMARY KEY (`job_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='数据同步任务主表';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='数据采集任务主表';
 
 -- ----------------------------
 -- Table structure for data_sync_job_catalog
@@ -73,7 +73,7 @@ CREATE TABLE `data_sync_job_catalog` (
   `updater_id` varchar(128) DEFAULT NULL COMMENT '修改人',
   `update_time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
   PRIMARY KEY (`catalog_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='数据同步任务分组表';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='数据采集任务分组表';
 
 -- ----------------------------
 -- Table structure for data_sync_job_instance
@@ -98,7 +98,7 @@ CREATE TABLE `data_sync_job_instance` (
   `updater_id` varchar(128) DEFAULT NULL COMMENT '修改人',
   `update_time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
   PRIMARY KEY (`instance_id`) USING BTREE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 ROW_FORMAT=DYNAMIC COMMENT='数据同步实例';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 ROW_FORMAT=DYNAMIC COMMENT='数据采集实例';
 
 -- ----------------------------
 -- Table structure for data_sync_sink_column
@@ -627,7 +627,7 @@ INSERT INTO lacus.sys_menu
 VALUES(2011, '数据表查询', 2009, 2, 'table', 'metadata/table/index', NULL, 0, 0, 2, 1, 1, 'metadata:table:list', 'table', 1, '2023-04-24 17:58:27', 1, '2024-03-23 19:58:36', '', 0);
 INSERT INTO lacus.sys_menu
 (menu_id, menu_name, parent_id, order_num, `path`, component, query, is_external, is_cache, menu_type, is_visible, status, perms, icon, creator_id, create_time, updater_id, update_time, remark, deleted)
-VALUES(2012, '数据同步', 0, 2, 'datasync', NULL, NULL, 0, 0, 1, 1, 1, NULL, 'example', 1, '2023-05-10 17:36:09', 1, '2024-05-02 17:56:37', '', 0);
+VALUES(2012, '数据采集', 0, 2, 'datasync', NULL, NULL, 0, 0, 1, 1, 1, NULL, 'example', 1, '2023-05-10 17:36:09', 1, '2024-05-02 17:56:37', '', 0);
 INSERT INTO lacus.sys_menu
 (menu_id, menu_name, parent_id, order_num, `path`, component, query, is_external, is_cache, menu_type, is_visible, status, perms, icon, creator_id, create_time, updater_id, update_time, remark, deleted)
 VALUES(2013, '任务分组', 2012, 1, 'catalog', 'datasync/catalog/index', NULL, 0, 0, 2, 1, 1, 'datasync:catalog:list', 'tool', 1, '2023-05-10 17:43:08', 1, '2024-03-04 14:48:39', '', 0);
