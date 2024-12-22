@@ -109,7 +109,7 @@ public class FlinkJobBaseService {
                             String address = flinkRpcService.getFlinkHttpAddress(flinkJobEntity.getDeployMode());
                             log.info("flink 提交地址：{}", address);
                             //1、构建执行命令
-                            command = commandService.buildRunCommandForCluster(jobRunParamDTO, flinkJobEntity, savepointPath, address);
+                            command = commandService.buildRunCommandForCluster(jobRunParamDTO, flinkJobEntity, savepointPath, address.replace("http://", ""));
                             instance.setJobScript(command);
                             //2、提交任务
                             appId = this.submitJobForStandalone(command, flinkJobEntity);

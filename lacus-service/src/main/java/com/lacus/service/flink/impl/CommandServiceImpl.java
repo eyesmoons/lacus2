@@ -1,6 +1,5 @@
 package com.lacus.service.flink.impl;
 
-import com.lacus.common.exception.CustomException;
 import com.lacus.dao.flink.entity.FlinkJobEntity;
 import com.lacus.dao.system.entity.SysEnvEntity;
 import com.lacus.enums.DeployModeEnum;
@@ -32,11 +31,10 @@ public class CommandServiceImpl implements ICommandService {
         StringBuilder command = new StringBuilder();
         Long envId = flinkJobEntity.getEnvId();
         SysEnvEntity env = envService.getById(envId);
-        if (ObjectUtils.isEmpty(env)) {
-            throw new CustomException("未设置环境变量");
+        if (ObjectUtils.isNotEmpty(env)) {
+            String config = env.getConfig();
+            command.append(config).append("\n");
         }
-        String config = env.getConfig();
-        command.append(config).append("\n");
         command.append(jobRunParamDTO.getFlinkBinPath()).append(" run -d");
         if (StringUtils.isNotEmpty(address)) {
             command.append(" -m ").append(address);
