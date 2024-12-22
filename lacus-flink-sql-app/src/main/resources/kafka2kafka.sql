@@ -6,7 +6,7 @@ CREATE TABLE input_table
 )
 WITH ( 'connector' = 'kafka',
     'topic' = 'source',
-    'properties.bootstrap.servers' = '10.10.80.70:6667,10.10.80.71:6667,10.10.80.72:6667',
+    'properties.bootstrap.servers' = 'hadoop1:9092,hadoop2:9092,hadoop3:9092',
     'scan.startup.mode' = 'earliest-offset',
     'properties.group.id' = 'testGroup',
     'format' = 'json');

@@ -31,7 +31,7 @@ CREATE TABLE `data_sync_column_mapping` (
   `updater_id` varchar(128) DEFAULT NULL COMMENT '修改人',
   `update_time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
   PRIMARY KEY (`column_mapping_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=8 DEFAULT CHARSET=utf8mb4 COMMENT='字段映射信息';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='字段映射信息';
 
 -- ----------------------------
 -- Table structure for data_sync_job
@@ -55,7 +55,7 @@ CREATE TABLE `data_sync_job` (
   `updater_id` varchar(128) DEFAULT NULL COMMENT '修改人',
   `update_time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
   PRIMARY KEY (`job_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=7 DEFAULT CHARSET=utf8mb4 COMMENT='数据同步任务主表';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='数据同步任务主表';
 
 -- ----------------------------
 -- Table structure for data_sync_job_catalog
@@ -73,7 +73,7 @@ CREATE TABLE `data_sync_job_catalog` (
   `updater_id` varchar(128) DEFAULT NULL COMMENT '修改人',
   `update_time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
   PRIMARY KEY (`catalog_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb4 COMMENT='数据同步任务分组表';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='数据同步任务分组表';
 
 -- ----------------------------
 -- Table structure for data_sync_job_instance
@@ -98,7 +98,7 @@ CREATE TABLE `data_sync_job_instance` (
   `updater_id` varchar(128) DEFAULT NULL COMMENT '修改人',
   `update_time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
   PRIMARY KEY (`instance_id`) USING BTREE
-) ENGINE=InnoDB AUTO_INCREMENT=50 DEFAULT CHARSET=utf8mb4 ROW_FORMAT=DYNAMIC COMMENT='数据同步实例';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 ROW_FORMAT=DYNAMIC COMMENT='数据同步实例';
 
 -- ----------------------------
 -- Table structure for data_sync_sink_column
@@ -115,7 +115,7 @@ CREATE TABLE `data_sync_sink_column` (
   `updater_id` varchar(128) DEFAULT NULL COMMENT '修改人',
   `update_time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
   PRIMARY KEY (`sink_column_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=8 DEFAULT CHARSET=utf8mb4 COMMENT='输出源字段信息';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='输出源字段信息';
 
 -- ----------------------------
 -- Table structure for data_sync_sink_table
@@ -132,7 +132,7 @@ CREATE TABLE `data_sync_sink_table` (
   `updater_id` varchar(128) DEFAULT NULL COMMENT '修改人',
   `update_time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
   PRIMARY KEY (`sink_table_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=8 DEFAULT CHARSET=utf8mb4 COMMENT='输出源表信息';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='输出源表信息';
 
 -- ----------------------------
 -- Table structure for data_sync_source_column
@@ -149,7 +149,7 @@ CREATE TABLE `data_sync_source_column` (
   `updater_id` varchar(128) DEFAULT NULL COMMENT '修改人',
   `update_time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
   PRIMARY KEY (`source_column_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=8 DEFAULT CHARSET=utf8mb4 COMMENT='输入源字段信息';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='输入源字段信息';
 
 -- ----------------------------
 -- Table structure for data_sync_source_table
@@ -166,7 +166,7 @@ CREATE TABLE `data_sync_source_table` (
   `updater_id` varchar(128) DEFAULT NULL COMMENT '修改人',
   `update_time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
   PRIMARY KEY (`source_table_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=8 DEFAULT CHARSET=utf8mb4 COMMENT='输入源表信息';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='输入源表信息';
 
 -- ----------------------------
 -- Table structure for data_sync_table_mapping
@@ -183,7 +183,7 @@ CREATE TABLE `data_sync_table_mapping` (
   `updater_id` varchar(128) DEFAULT NULL COMMENT '修改人',
   `update_time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
   PRIMARY KEY (`table_mapping_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=8 DEFAULT CHARSET=utf8mb4 COMMENT='表映射信息';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='表映射信息';
 
 -- ----------------------------
 -- Table structure for meta_column
@@ -208,7 +208,7 @@ CREATE TABLE `meta_column` (
   `update_time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
   PRIMARY KEY (`column_id`),
   KEY `unique_key_column` (`table_id`,`column_name`)
-) ENGINE=InnoDB AUTO_INCREMENT=2591 DEFAULT CHARSET=utf8mb4 COMMENT='字段';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='字段';
 
 -- ----------------------------
 -- Table structure for meta_datasource
@@ -234,7 +234,7 @@ CREATE TABLE `meta_datasource` (
   `update_time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
   PRIMARY KEY (`datasource_id`),
   KEY `unique_key_datasourcename` (`datasource_name`)
-) ENGINE=InnoDB AUTO_INCREMENT=14 DEFAULT CHARSET=utf8mb4 COMMENT='数据源';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='数据源';
 
 -- ----------------------------
 -- Table structure for meta_datasource_type
@@ -255,7 +255,7 @@ CREATE TABLE `meta_datasource_type` (
   `updater_id` varchar(128) DEFAULT NULL COMMENT '修改人',
   `update_time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
   PRIMARY KEY (`type_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=11 DEFAULT CHARSET=utf8mb4 COMMENT='数据源类型';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='数据源类型';
 
 -- ----------------------------
 -- Records of meta_datasource_type
@@ -284,7 +284,7 @@ CREATE TABLE `meta_db` (
   `update_time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
   PRIMARY KEY (`db_id`),
   KEY `unique_key_db` (`datasource_id`,`db_name`)
-) ENGINE=InnoDB AUTO_INCREMENT=20 DEFAULT CHARSET=utf8mb4 COMMENT='数据库';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='数据库';
 
 -- ----------------------------
 -- Table structure for meta_table
@@ -305,7 +305,7 @@ CREATE TABLE `meta_table` (
   `update_time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
   PRIMARY KEY (`table_id`),
   KEY `unique_key_tbl` (`db_id`,`table_name`)
-) ENGINE=InnoDB AUTO_INCREMENT=232 DEFAULT CHARSET=utf8mb4 COMMENT='数据表';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='数据表';
 
 -- ----------------------------
 -- Table structure for sys_config
@@ -326,7 +326,7 @@ CREATE TABLE `sys_config` (
   `deleted` tinyint(1) NOT NULL DEFAULT '0' COMMENT '逻辑删除',
   PRIMARY KEY (`config_id`),
   UNIQUE KEY `config_key_uniq_idx` (`config_key`) USING BTREE
-) ENGINE=InnoDB AUTO_INCREMENT=6 DEFAULT CHARSET=utf8mb4 COMMENT='参数配置表';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='参数配置表';
 
 -- ----------------------------
 -- Records of sys_config
@@ -360,7 +360,7 @@ CREATE TABLE `sys_dept` (
   `update_time` datetime DEFAULT NULL COMMENT '更新时间',
   `deleted` tinyint(1) NOT NULL DEFAULT '0' COMMENT '逻辑删除',
   PRIMARY KEY (`dept_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=205 DEFAULT CHARSET=utf8mb4 COMMENT='部门表';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='部门表';
 
 -- ----------------------------
 -- Records of sys_dept
@@ -396,7 +396,7 @@ CREATE TABLE `sys_login_info` (
   `login_time` datetime DEFAULT NULL COMMENT '访问时间',
   `deleted` tinyint(1) NOT NULL DEFAULT '0' COMMENT '逻辑删除',
   PRIMARY KEY (`info_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=1300 DEFAULT CHARSET=utf8mb4 COMMENT='系统访问记录';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='系统访问记录';
 
 -- ----------------------------
 -- Table structure for sys_menu
@@ -424,7 +424,7 @@ CREATE TABLE `sys_menu` (
   `remark` varchar(512) DEFAULT '' COMMENT '备注',
   `deleted` tinyint(1) NOT NULL DEFAULT '0' COMMENT '逻辑删除',
   PRIMARY KEY (`menu_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=2031 DEFAULT CHARSET=utf8mb4 COMMENT='菜单权限表';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='菜单权限表';
 
 -- ----------------------------
 -- Records of sys_menu
@@ -687,6 +687,9 @@ INSERT INTO lacus.sys_menu
 VALUES(2031, '环境管理', 2033, 1, 'env', 'system/env/index', NULL, 0, 1, 2, 1, 1, 'system:env:list', 'skill', 1, '2024-05-02 17:11:53', 1, '2024-05-02 17:54:56', '', 0);
 INSERT INTO lacus.sys_menu
 (menu_id, menu_name, parent_id, order_num, `path`, component, query, is_external, is_cache, menu_type, is_visible, status, perms, icon, creator_id, create_time, updater_id, update_time, remark, deleted)
+VALUES(2039, '资源管理', 2033, 1, 'resource', 'system/resource/index', NULL, 0, 1, 2, 1, 1, 'system:resource:list', 'skill', 1, '2024-05-02 17:11:53', 1, '2024-05-02 17:54:56', '', 0);
+INSERT INTO lacus.sys_menu
+(menu_id, menu_name, parent_id, order_num, `path`, component, query, is_external, is_cache, menu_type, is_visible, status, perms, icon, creator_id, create_time, updater_id, update_time, remark, deleted)
 VALUES(2032, '消息中心', 0, 6, 'message', NULL, NULL, 0, 0, 1, 1, 1, NULL, 'message', 1, '2024-05-02 17:53:08', 1, '2024-05-02 17:57:41', '', 0);
 INSERT INTO lacus.sys_menu
 (menu_id, menu_name, parent_id, order_num, `path`, component, query, is_external, is_cache, menu_type, is_visible, status, perms, icon, creator_id, create_time, updater_id, update_time, remark, deleted)
@@ -718,7 +721,7 @@ CREATE TABLE `sys_notice` (
   `remark` varchar(255) NOT NULL DEFAULT '' COMMENT '备注',
   `deleted` tinyint(1) NOT NULL DEFAULT '0' COMMENT '逻辑删除',
   PRIMARY KEY (`notice_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4 COMMENT='通知公告表';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='通知公告表';
 
 -- ----------------------------
 -- Records of sys_notice
@@ -753,7 +756,7 @@ CREATE TABLE `sys_operation_log` (
   `operation_time` datetime NOT NULL COMMENT '操作时间',
   `deleted` tinyint(1) NOT NULL DEFAULT '0' COMMENT '逻辑删除',
   PRIMARY KEY (`operation_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=977 DEFAULT CHARSET=utf8mb4 COMMENT='操作日志记录';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='操作日志记录';
 
 -- ----------------------------
 -- Table structure for sys_post
@@ -772,7 +775,7 @@ CREATE TABLE `sys_post` (
   `update_time` datetime DEFAULT NULL COMMENT '更新时间',
   `deleted` tinyint(1) NOT NULL DEFAULT '0' COMMENT '逻辑删除',
   PRIMARY KEY (`post_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=utf8mb4 COMMENT='岗位信息表';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='岗位信息表';
 
 -- ----------------------------
 -- Records of sys_post
@@ -803,7 +806,7 @@ CREATE TABLE `sys_role` (
   `remark` varchar(512) DEFAULT NULL COMMENT '备注',
   `deleted` tinyint(1) NOT NULL DEFAULT '0' COMMENT '删除标志（0代表存在 1代表删除）',
   PRIMARY KEY (`role_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb4 COMMENT='角色信息表';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='角色信息表';
 
 -- ----------------------------
 -- Records of sys_role
@@ -877,7 +880,7 @@ CREATE TABLE `sys_user` (
   `remark` varchar(512) DEFAULT NULL COMMENT '备注',
   `deleted` tinyint(1) NOT NULL DEFAULT '0' COMMENT '删除标志（0代表存在 1代表删除）',
   PRIMARY KEY (`user_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=110 DEFAULT CHARSET=utf8mb4 COMMENT='用户信息表';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='用户信息表';
 
 -- ----------------------------
 -- Records of sys_user
@@ -888,10 +891,10 @@ INSERT INTO `sys_user` (`user_id`, `post_id`, `role_id`, `dept_id`, `username`, 
 COMMIT;
 
 -- ----------------------------
--- Table structure for system_env
+-- Table structure for sys_env
 -- ----------------------------
 DROP TABLE IF EXISTS `sys_env`;
-CREATE TABLE `system_env` (
+CREATE TABLE `sys_env` (
       `env_id` bigint(20) NOT NULL AUTO_INCREMENT COMMENT '自增主键',
       `name` varchar(100) NOT NULL COMMENT '环境名称',
       `config` longtext NOT NULL COMMENT '环境配置',
@@ -908,23 +911,23 @@ CREATE TABLE `system_env` (
 -- Table structure for sys_resources
 -- ----------------------------
 CREATE TABLE `sys_resources` (
-     `id` int NOT NULL AUTO_INCREMENT COMMENT 'resource id',
-     `pid` int DEFAULT NULL COMMENT 'parent resource id',
-     `alia_name` varchar(64) DEFAULT NULL COMMENT 'alia name',
-     `file_name` varchar(64) DEFAULT NULL COMMENT 'file name',
-     `file_path` varchar(128) DEFAULT NULL COMMENT 'file path',
-     `remark` varchar(255) DEFAULT NULL,
-     `type` tinyint DEFAULT NULL COMMENT 'resource type: 0 FILE，1 UDF',
-     `size` bigint DEFAULT NULL COMMENT 'resource size',
-     `is_directory` tinyint DEFAULT NULL,
-     `deleted` tinyint NOT NULL DEFAULT '0' COMMENT '删除标识：正常 0 删除 1',
-     `creator_id` varchar(64) NOT NULL DEFAULT '' COMMENT '创建人',
-     `create_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
-     `updater_id` varchar(128) DEFAULT NULL COMMENT '修改人',
-     `update_time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
-     PRIMARY KEY (`resource_id`),
-     UNIQUE KEY `sys_resources_un` (`file_path`,`type`)
-) ENGINE=InnoDB;
+    `id` int NOT NULL AUTO_INCREMENT COMMENT 'resource id',
+    `pid` int DEFAULT NULL COMMENT 'parent resource id',
+    `name` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL COMMENT 'alia name',
+    `file_name` varchar(64) DEFAULT NULL COMMENT 'file name',
+    `file_path` varchar(128) DEFAULT NULL COMMENT 'file path',
+    `remark` varchar(255) DEFAULT NULL,
+    `type` tinyint DEFAULT NULL COMMENT 'resource type: 0 FILE，1 UDF',
+    `size` bigint DEFAULT NULL COMMENT 'resource size',
+    `is_directory` tinyint DEFAULT NULL,
+    `deleted` tinyint NOT NULL DEFAULT '0' COMMENT '删除标识：正常 0 删除 1',
+    `creator_id` varchar(64) NOT NULL DEFAULT '' COMMENT '创建人',
+    `create_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+    `updater_id` varchar(128) DEFAULT NULL COMMENT '修改人',
+    `update_time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+    PRIMARY KEY (`id`),
+    UNIQUE KEY `sys_resources_un` (`file_path`,`type`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 -- ----------------------------
 -- Table structure for flink_job
@@ -932,19 +935,19 @@ CREATE TABLE `sys_resources` (
 CREATE TABLE `flink_job` (
     `job_id` bigint NOT NULL AUTO_INCREMENT COMMENT '自增主键',
     `job_name` varchar(100) NOT NULL COMMENT '任务名称',
-    `app_id` varchar(100) NOT NULL COMMENT 'application id',
-    `save_point` varchar(100) NOT NULL COMMENT 'savepoint',
+    `app_id` varchar(100) DEFAULT NULL COMMENT 'application id',
+    `save_point` varchar(100) DEFAULT NULL COMMENT 'savepoint',
     `job_type` varchar(100) NOT NULL COMMENT '任务类型 STREAMING_SQL, BATCH_SQL, JAR',
-    `job_manager` int not null default '1' comment 'job_manager',
-    `task_manager` int not null default '1' comment 'task_manager',
-    `slot` int not null default '1' comment 'slot',
-    `parallelism` int not null default '1' comment '并行度',
-    `queue` varchar(100) default null comment '队列',
+    `job_manager` int NOT NULL DEFAULT '1' COMMENT 'job_manager',
+    `task_manager` int NOT NULL DEFAULT '1' COMMENT 'task_manager',
+    `slot` int NOT NULL DEFAULT '1' COMMENT 'slot',
+    `parallelism` int NOT NULL DEFAULT '1' COMMENT '并行度',
+    `queue` varchar(100) DEFAULT NULL COMMENT '队列',
     `deploy_mode` varchar(100) NOT NULL COMMENT '部署模式：YARN_PER, STANDALONE, LOCAL, YARN_APPLICATION',
-    `flink_sql` text DEFAULT NULL COMMENT 'flink sql',
+    `flink_sql` text COMMENT 'flink sql',
     `main_jar_path` varchar(100) DEFAULT NULL COMMENT '主jar包路径',
     `ext_jar_path` varchar(100) DEFAULT NULL COMMENT '第三方jar udf、 连接器等',
-    `main_class` varchar(100) COMMENT '主类名',
+    `main_class_name` varchar(100) DEFAULT NULL COMMENT '主类名',
     `flink_run_config` varchar(200) DEFAULT NULL COMMENT 'flink参数',
     `custom_args` varchar(200) DEFAULT NULL COMMENT '自定义参数',
     `env_id` bigint DEFAULT NULL COMMENT '环境id',
@@ -956,7 +959,8 @@ CREATE TABLE `flink_job` (
     `updater_id` varchar(128) DEFAULT NULL COMMENT '修改人',
     `update_time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
     PRIMARY KEY (`job_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='flink任务表';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='flink任务表';
+
 
 -- ----------------------------
 -- Table structure for flink_job_instance
