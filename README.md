@@ -41,8 +41,8 @@
 - 数据采集-任务实例
 ![数据采集-任务实例](images/data-collect-job-instance.png)
 - flink开发-任务定义
-![flink开发-任务定义](images/flink-job-define.png)·
-- ![flink开发-任务定义](images/flink-job-edit.png)
+![flink开发-任务定义](images/flink-job-define.png)
+![flink开发-任务定义](images/flink-job-edit.png)
 - flink开发-任务实例
 ![flink开发-任务实例](images/flink-job-instance.png)
 - 配置中心-环境管理
