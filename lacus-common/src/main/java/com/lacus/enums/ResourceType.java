@@ -9,12 +9,7 @@ import lombok.Getter;
 @Getter
 public enum ResourceType {
 
-    /**
-     * 0 file, 1 udf
-     */
-    FILE(0, "file"),
-    UDF(1, "udf"),
-    ALL(2, "all");
+    FILE(0, "file");
 
     ResourceType(int code, String descp) {
         this.code = code;

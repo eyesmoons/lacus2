@@ -16,7 +16,6 @@ import static com.lacus.common.constant.Constants.KERBEROS;
 import static com.lacus.common.constant.Constants.LOGIN_USER_KEY_TAB_PATH;
 import static com.lacus.common.constant.Constants.LOGIN_USER_KEY_TAB_USERNAME;
 import static com.lacus.common.constant.Constants.RESOURCE_STORAGE_TYPE;
-import static com.lacus.common.constant.Constants.RESOURCE_UPLOAD_PATH;
 
 /**
  * common utils
@@ -93,37 +92,5 @@ public class CommonUtils {
             return true;
         }
         return false;
-    }
-
-    /**
-     * hdfs udf dir
-     *
-     * @param tenantCode tenant code
-     * @return get udf dir on hdfs
-     */
-    public static String getHdfsUdfDir(String tenantCode) {
-        return String.format("%s/udfs", getHdfsTenantDir(tenantCode));
-    }
-
-    /**
-     * @param tenantCode tenant code
-     * @return file directory of tenants on hdfs
-     */
-    public static String getHdfsTenantDir(String tenantCode) {
-        return String.format("%s/%s", getHdfsDataBasePath(), tenantCode);
-    }
-
-    /**
-     * get hdfs data path
-     *
-     * @return data hdfs path
-     */
-    public static String getHdfsDataBasePath() {
-        String resourceUploadPath = PropertyUtils.getString(RESOURCE_UPLOAD_PATH, "/lacus");
-        if ("/".equals(resourceUploadPath)) {
-            return "";
-        } else {
-            return resourceUploadPath;
-        }
     }
 }

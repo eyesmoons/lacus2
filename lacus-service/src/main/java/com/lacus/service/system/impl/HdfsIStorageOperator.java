@@ -4,7 +4,6 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.lacus.common.config.HdfsStorageProperties;
 import com.lacus.common.exception.CustomException;
 import com.lacus.dao.system.entity.StorageEntity;
-import com.lacus.enums.ResUploadType;
 import com.lacus.enums.ResourceType;
 import com.lacus.service.system.IStorageOperate;
 import com.lacus.utils.CommonUtils;
@@ -48,13 +47,9 @@ import static com.lacus.common.constant.Constants.COLON;
 import static com.lacus.common.constant.Constants.COMMA;
 import static com.lacus.common.constant.Constants.DEFAULT_HDFS_CONFIG;
 import static com.lacus.common.constant.Constants.DOUBLE_SLASH;
-import static com.lacus.common.constant.Constants.EMPTY_STRING;
 import static com.lacus.common.constant.Constants.FOLDER_SEPARATOR;
-import static com.lacus.common.constant.Constants.FORMAT_S_S;
 import static com.lacus.common.constant.Constants.HADOOP_RM_STATE_ACTIVE;
 import static com.lacus.common.constant.Constants.HDFS_DEFAULT_FS;
-import static com.lacus.common.constant.Constants.RESOURCE_TYPE_FILE;
-import static com.lacus.common.constant.Constants.RESOURCE_TYPE_UDF;
 
 @Slf4j
 @Service("storageOperator")
@@ -74,24 +69,9 @@ public class HdfsIStorageOperator implements Closeable, IStorageOperate {
     }
 
     public HdfsIStorageOperator(HdfsStorageProperties hdfsStorageProperties) {
-        // Overwrite config from passing hdfsStorageProperties
         hdfsProperties = hdfsStorageProperties;
+        // init hadoop configuration
         init();
-        initHdfsPath();
-    }
-
-    /**
-     * init lacus root path in hdfs
-     */
-    private void initHdfsPath() {
-        Path path = new Path(RESOURCE_UPLOAD_PATH);
-        try {
-            if (!fs.exists(path)) {
-                fs.mkdirs(path);
-            }
-        } catch (Exception e) {
-            log.error(e.getMessage(), e);
-        }
     }
 
     /**
@@ -100,7 +80,6 @@ public class HdfsIStorageOperator implements Closeable, IStorageOperate {
     public void init() throws NullPointerException {
         try {
             configuration = new HdfsConfiguration();
-
             String hdfsUser = hdfsProperties.getUser();
             if (CommonUtils.loadKerberosConf(configuration)) {
                 hdfsUser = "";
@@ -193,7 +172,6 @@ public class HdfsIStorageOperator implements Closeable, IStorageOperate {
             log.error("hdfs file path:{} is blank", hdfsFilePath);
             return new byte[0];
         }
-
         try (FSDataInputStream fsDataInputStream = fs.open(new Path(hdfsFilePath))) {
             return IOUtils.toByteArray(fsDataInputStream);
         }
@@ -227,22 +205,6 @@ public class HdfsIStorageOperator implements Closeable, IStorageOperate {
         return catFile(hdfsFilePath, skipLineNums, limit);
     }
 
-    @Override
-    public void createTenantDirIfNotExists() throws IOException {
-        mkdir(getHdfsResDir());
-        mkdir(getHdfsUdfDir());
-    }
-
-    @Override
-    public String getResDir() {
-        return getHdfsResDir() + FOLDER_SEPARATOR;
-    }
-
-    @Override
-    public String getUdfDir() {
-        return getHdfsUdfDir() + FOLDER_SEPARATOR;
-    }
-
     /**
      * make the given file and all non-existent parents into
      * directories. Has the semantics of Unix 'mkdir -p'.
@@ -255,16 +217,6 @@ public class HdfsIStorageOperator implements Closeable, IStorageOperate {
     @Override
     public boolean mkdir(String hdfsPath) throws IOException {
         return fs.mkdirs(new Path(addFolderSeparatorIfNotExisted(hdfsPath)));
-    }
-
-    @Override
-    public String getResourceFullName(String fullName) {
-        return getHdfsResourceFileName(fullName);
-    }
-
-    @Override
-    public String getFileName(ResourceType resourceType, String fileName) {
-        return getHdfsFileName(resourceType, fileName);
     }
 
     @Override
@@ -395,7 +347,7 @@ public class HdfsIStorageOperator implements Closeable, IStorageOperate {
      * @throws IOException errors
      */
     @Override
-    public List<StorageEntity> listFilesStatus(String path, String defaultPath, ResourceType type) throws IOException {
+    public List<StorageEntity> listFilesStatus(String path, ResourceType type) throws IOException {
         List<StorageEntity> storageEntityList = new ArrayList<>();
         try {
             Path filePath = new Path(path);
@@ -412,7 +364,7 @@ public class HdfsIStorageOperator implements Closeable, IStorageOperate {
                     fullName = addFolderSeparatorIfNotExisted(fullName);
 
                     String suffix = StringUtils.difference(path, fullName);
-                    String fileName = StringUtils.difference(defaultPath, fullName);
+                    String fileName = fullName;
 
                     StorageEntity entity = new StorageEntity();
                     entity.setAlias(suffix);
@@ -432,11 +384,9 @@ public class HdfsIStorageOperator implements Closeable, IStorageOperate {
                     String[] aliasArr = fullName.split("/");
                     String alias = aliasArr[aliasArr.length - 1];
 
-                    String fileName = StringUtils.difference(defaultPath, fullName);
-
                     StorageEntity entity = new StorageEntity();
                     entity.setAlias(alias);
-                    entity.setFileName(fileName);
+                    entity.setFileName(fullName);
                     entity.setFullName(fullName);
                     entity.setDirectory(false);
                     entity.setType(type);
@@ -458,21 +408,19 @@ public class HdfsIStorageOperator implements Closeable, IStorageOperate {
     }
 
     @Override
-    public StorageEntity getFileStatus(String path, String prefix,
-                                       ResourceType type) throws IOException {
+    public StorageEntity getFileStatus(String path, ResourceType type) throws IOException {
         try {
             FileStatus fileStatus = fs.getFileStatus(new Path(path));
             String alias;
-            String fileName;
+            String fileName = "";
             String fullName = fileStatus.getPath().toString();
             if (fileStatus.isDirectory()) {
                 fullName = addFolderSeparatorIfNotExisted(fullName);
                 alias = findDirAlias(fullName);
-                fileName = StringUtils.difference(prefix, fullName);
             } else {
                 String[] aliasArr = fileStatus.getPath().toString().split("/");
                 alias = aliasArr[aliasArr.length - 1];
-                fileName = StringUtils.difference(prefix, fileStatus.getPath().toString());
+                fileName = fileStatus.getPath().toString();
             }
 
             StorageEntity entity = new StorageEntity();
@@ -494,6 +442,7 @@ public class HdfsIStorageOperator implements Closeable, IStorageOperate {
         }
     }
 
+
     /**
      * Renames Path src to Path dst.  Can take place on local fs
      * or remote DFS.
@@ -507,74 +456,8 @@ public class HdfsIStorageOperator implements Closeable, IStorageOperate {
         return fs.rename(new Path(src), new Path(dst));
     }
 
-    /**
-     * get data hdfs path
-     *
-     * @return data hdfs path
-     */
-    public static String getHdfsDataBasePath() {
-        String defaultFS = hdfsProperties.getDefaultFS();
-        defaultFS = defaultFS.endsWith("/") ? StringUtils.chop(defaultFS) : defaultFS;
-        if (FOLDER_SEPARATOR.equals(RESOURCE_UPLOAD_PATH)) {
-            return defaultFS;
-        } else {
-            return defaultFS + RESOURCE_UPLOAD_PATH;
-        }
-    }
-
-    public String getHdfsPath(){
+    public String getHdfsPath() {
         return hdfsProperties.getDefaultFS();
-    }
-
-    public static String getHdfsDir(ResourceType resourceType) {
-        switch (resourceType) {
-            case UDF:
-                return getHdfsUdfDir();
-            case FILE:
-                return getHdfsResDir();
-            case ALL:
-                return getHdfsDataBasePath();
-            default:
-                return EMPTY_STRING;
-        }
-    }
-
-    @Override
-    public String getDir(ResourceType resourceType) {
-        return getHdfsDir(resourceType);
-    }
-
-    public static String getHdfsResDir() {
-        return String.format("%s/" + RESOURCE_TYPE_FILE, getHdfsTenantDir());
-    }
-
-    public static String getHdfsUdfDir() {
-        return String.format("%s/" + RESOURCE_TYPE_UDF, getHdfsTenantDir());
-    }
-
-    public static String getHdfsFileName(ResourceType resourceType, String fileName) {
-        if (fileName.startsWith(FOLDER_SEPARATOR)) {
-            fileName = fileName.replaceFirst(FOLDER_SEPARATOR, "");
-        }
-        return String.format(FORMAT_S_S, getHdfsDir(resourceType), fileName);
-    }
-
-    public static String getHdfsResourceFileName(String fileName) {
-        if (fileName.startsWith(FOLDER_SEPARATOR)) {
-            fileName = fileName.replaceFirst(FOLDER_SEPARATOR, "");
-        }
-        return String.format(FORMAT_S_S, getHdfsResDir(), fileName);
-    }
-
-    public static String getHdfsUdfFileName(String fileName) {
-        if (fileName.startsWith(FOLDER_SEPARATOR)) {
-            fileName = fileName.replaceFirst(FOLDER_SEPARATOR, "");
-        }
-        return String.format(FORMAT_S_S, getHdfsUdfDir(), fileName);
-    }
-
-    public static String getHdfsTenantDir() {
-        return getHdfsDataBasePath();
     }
 
     /**
@@ -681,12 +564,7 @@ public class HdfsIStorageOperator implements Closeable, IStorageOperate {
     }
 
     @Override
-    public ResUploadType returnStorageType() {
-        return ResUploadType.HDFS;
-    }
-
-    @Override
-    public List<StorageEntity> listFilesStatusRecursively(String path, String defaultPath, ResourceType type) {
+    public List<StorageEntity> listFilesStatusRecursively(String path, ResourceType type) {
         List<StorageEntity> storageEntityList = new ArrayList<>();
 
         LinkedList<StorageEntity> foldersToFetch = new LinkedList<>();
@@ -699,7 +577,7 @@ public class HdfsIStorageOperator implements Closeable, IStorageOperate {
             }
 
             try {
-                List<StorageEntity> tempList = listFilesStatus(pathToExplore, defaultPath, type);
+                List<StorageEntity> tempList = listFilesStatus(pathToExplore, type);
 
                 for (StorageEntity temp : tempList) {
                     if (temp.isDirectory()) {

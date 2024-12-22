@@ -67,7 +67,6 @@ public class Constants {
     public static final String YARN_RESTAPI_ADDRESS = "yarn.restapi-address";
     public static final String YARN_NODE_ADDRESS = "yarn.node-address";
     public static final String HADOOP_USER = "hadoop.username";
-    public static final String RESOURCE_UPLOAD_PATH = "resource.storage.upload.base.path";
     public static final String DATA_BASEDIR_PATH = "data.basedir.path";
     public static final String RESOURCE_VIEW_SUFFIXES = "resource.view.suffixs";
     public static final String RESOURCE_VIEW_SUFFIXES_DEFAULT_VALUE = "txt,log,sh,bat,conf,cfg,py,java,sql,xml,hql,properties,json,yml,yaml,ini,js,csv,md";
@@ -102,9 +101,8 @@ public class Constants {
     public static final String FLINK_HTTP_ADDRESS = "flink.rest.http.address";
     // flink Rest web HA 地址(Standalone Cluster模式 支持HA 可以填写多个地址,用;分隔)
     public static final String FLINK_REST_HA_HTTP_ADDRESS = "flink.rest.ha.http.address";
-    public static final String FLINK_STREAMING_JARVERSION = "flink.streaming.jarversion";
+    public static final String FLINK_SQL_JOB_JAR = "flink.sql.job.jar";
     public static final String FLINK_DEFAULT_SAVEPOINT_PATH = "flink.default.savepoint.path";
-    public static final String FLINK_DEFAULT_CHECKPOINT_PATH = "flink.default.checkpoint.path";
     public static final String FLINK_HDFS_COLLECTOR_CONF_PATH = "flink.hdfs.collector.conf-path";
     public static final String FLINK_HDFS_COLLECTOR_JOB_JARS_PATH = "flink.hdfs.collector.job-jars-path";
     public static final String FLINK_HDFS_COLLECTOR_JAR_NAME = "flink.hdfs.collector.jar-name";

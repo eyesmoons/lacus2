@@ -2,24 +2,18 @@ package com.lacus.domain.system.resources;
 
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.google.common.io.Files;
-import com.lacus.common.constant.Constants;
 import com.lacus.common.core.page.PageDTO;
 import com.lacus.common.exception.CustomException;
 import com.lacus.dao.system.entity.StorageEntity;
 import com.lacus.dao.system.entity.SysResourcesEntity;
 import com.lacus.domain.system.resources.command.ResourceAddCommand;
-import com.lacus.domain.system.resources.dto.ResourceComponent;
-import com.lacus.domain.system.resources.dto.visitor.ResourceTreeVisitor;
-import com.lacus.domain.system.resources.dto.visitor.Visitor;
 import com.lacus.domain.system.resources.model.ResourceModel;
 import com.lacus.domain.system.resources.model.ResourceModelFactory;
 import com.lacus.domain.system.resources.query.ResourceQuery;
-import com.lacus.enums.ResUploadType;
 import com.lacus.enums.ResourceType;
 import com.lacus.enums.Status;
 import com.lacus.service.system.IStorageOperate;
 import com.lacus.service.system.ISysResourcesService;
-import com.lacus.utils.PropertyUtils;
 import com.lacus.utils.RegexUtils;
 import com.lacus.utils.file.FileUtil;
 import lombok.extern.slf4j.Slf4j;
@@ -37,7 +31,6 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
-import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 import static com.lacus.common.constant.Constants.JAR;
@@ -130,27 +123,6 @@ public class ResourceService {
         return sysResourcesService.listResource(type, pid, fileName, isDirectory);
     }
 
-    public List<ResourceComponent> queryResourceListBak(Boolean isDirectory, ResourceType type, String fullName) {
-        String defaultPath;
-        List<StorageEntity> resourcesList;
-
-        if (StringUtils.isBlank(fullName)) {
-            defaultPath = storageOperate.getResDir();
-            if (type.equals(ResourceType.UDF)) {
-                defaultPath = storageOperate.getUdfDir();
-            }
-            resourcesList = storageOperate.listFilesStatusRecursively(defaultPath, defaultPath, type);
-        } else {
-            defaultPath = storageOperate.getResDir();
-            if (type.equals(ResourceType.UDF)) {
-                defaultPath = storageOperate.getUdfDir();
-            }
-            resourcesList = storageOperate.listFilesStatusRecursively(fullName, defaultPath, type);
-        }
-        Visitor resourceTreeVisitor = new ResourceTreeVisitor(resourcesList);
-        return resourceTreeVisitor.visit(defaultPath).getChildren();
-    }
-
     public PageDTO queryResourceListPaging(ResourceQuery query) {
         Page<SysResourcesEntity> page = sysResourcesService.page(query.toPage(), query.toQueryWrapper());
         return new PageDTO(page.getRecords(), page.getTotal());
@@ -189,14 +161,13 @@ public class ResourceService {
     }
 
     public void deleteResource(long id) throws IOException {
-        String defaultPath = storageOperate.getResDir();
         StorageEntity resource;
         SysResourcesEntity byId = sysResourcesService.getById(id);
         try {
             if (ObjectUtils.isEmpty(byId)) {
                 throw new CustomException(Status.RESOURCE_NOT_EXIST.getMsg());
             }
-            resource = storageOperate.getFileStatus(byId.getFilePath(), defaultPath, null);
+            resource = storageOperate.getFileStatus(byId.getFilePath(), null);
         } catch (Exception e) {
             log.error("{}, Resource id: {}", e.getMessage(), id, e);
             throw new CustomException(String.format(e.getMessage() + " resource id: %s", id));
@@ -206,7 +177,7 @@ public class ResourceService {
             log.error("Resource does not exist, resource id：{}", id);
             throw new CustomException(Status.RESOURCE_NOT_EXIST.getMsg());
         }
-        List<String> allChildren = storageOperate.listFilesStatusRecursively(byId.getFilePath(), defaultPath, resource.getType()).stream().map(StorageEntity::getFullName).collect(Collectors.toList());
+        List<String> allChildren = storageOperate.listFilesStatusRecursively(byId.getFilePath(), resource.getType()).stream().map(StorageEntity::getFullName).collect(Collectors.toList());
         // delete file on hdfs
         storageOperate.delete(byId.getFilePath(), allChildren, true);
         // delete from db
@@ -258,12 +229,7 @@ public class ResourceService {
     }
 
     private void createDirectory(String fullName, ResourceType type) {
-        String resourceRootPath = storageOperate.getDir(type);
         try {
-            if (!storageOperate.exists(resourceRootPath)) {
-                storageOperate.createTenantDirIfNotExists();
-            }
-
             if (!storageOperate.mkdir(fullName)) {
                 throw new CustomException(String.format("Create resource directory: %s failed.", fullName));
             }
@@ -331,10 +297,6 @@ public class ResourceService {
         // save file to hdfs, and delete original file
         String resourcePath = storageOperate.getHdfsPath() + fullName;
         try {
-            // if tenant dir not exists
-            if (!storageOperate.exists(resourcePath)) {
-                storageOperate.createTenantDirIfNotExists();
-            }
             FileUtil.copyInputStreamToFile(file, localFilename);
             storageOperate.upload(localFilename, fullName, true, true);
         } catch (Exception e) {
@@ -343,26 +305,6 @@ public class ResourceService {
             return false;
         }
         return true;
-    }
-
-    private List<StorageEntity> queryStorageEntityList(String fullName, ResourceType type, boolean recursive) {
-        List<StorageEntity> resourcesList;
-        String resourceStorageType = PropertyUtils.getString(Constants.RESOURCE_STORAGE_TYPE, ResUploadType.LOCAL.name());
-        String defaultPath = storageOperate.getResDir();
-        if (type.equals(ResourceType.UDF)) {
-            defaultPath = storageOperate.getUdfDir();
-        }
-
-        try {
-            if (StringUtils.isBlank(fullName)) {
-                fullName = defaultPath;
-            }
-            resourcesList = recursive ? storageOperate.listFilesStatusRecursively(fullName, defaultPath, type) : storageOperate.listFilesStatus(fullName, defaultPath, type);
-        } catch (Exception e) {
-            log.error("{} Resource path: {}", e.getMessage(), fullName, e);
-            throw new CustomException(String.format(e.getMessage() + " make sure resource path: %s exists in %s", defaultPath, resourceStorageType));
-        }
-        return resourcesList;
     }
 
     public String readResource(Long id) {

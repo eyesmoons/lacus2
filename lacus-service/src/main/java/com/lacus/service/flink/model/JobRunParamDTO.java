@@ -36,7 +36,7 @@ public class JobRunParamDTO {
     /**
      * 程序所在目录 如：/use/local/lacus
      */
-    private String sysHome;
+    private String appHome;
 
     /**
      * 主类jar地址
@@ -46,12 +46,12 @@ public class JobRunParamDTO {
     public JobRunParamDTO(String flinkBinPath,
                           String flinkRunParam,
                           String sqlPath,
-                          String sysHome,
+                          String appHome,
                           String flinkCheckpointConfig) {
         this.flinkBinPath = flinkBinPath;
         this.flinkRunParam = flinkRunParam;
         this.sqlPath = sqlPath;
-        this.sysHome = sysHome;
+        this.appHome = appHome;
         this.flinkCheckpointConfig = flinkCheckpointConfig;
     }
 

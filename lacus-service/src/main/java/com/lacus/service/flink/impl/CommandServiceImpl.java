@@ -14,7 +14,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import static com.lacus.common.constant.Constants.FLINK_STREAMING_JARVERSION;
+import static com.lacus.common.constant.Constants.FLINK_SQL_JOB_JAR;
 
 @Service
 @Slf4j
@@ -61,7 +61,7 @@ public class CommandServiceImpl implements ICommandService {
             case BATCH_SQL:
             case STREAMING_SQL:
                 command.append(" -c ").append(APP_CLASS_NAME);
-                command.append(" ").append(jobRunParamDTO.getSysHome()).append(PropertyUtils.getString(FLINK_STREAMING_JARVERSION));
+                command.append(" ").append(jobRunParamDTO.getAppHome()).append(PropertyUtils.getString(FLINK_SQL_JOB_JAR));
                 command.append(" -sql ").append(jobRunParamDTO.getSqlPath());
                 if (StringUtils.isNotEmpty(jobRunParamDTO.getFlinkCheckpointConfig())) {
                     command.append(" -checkpointDir ").append(jobRunParamDTO.getFlinkCheckpointConfig());
@@ -117,7 +117,7 @@ public class CommandServiceImpl implements ICommandService {
             case STREAMING_SQL:
             case BATCH_SQL:
                 command.append(" -c ").append(APP_CLASS_NAME);
-                command.append(" ").append(jobRunParamDTO.getSysHome()).append(PropertyUtils.getString(FLINK_STREAMING_JARVERSION));
+                command.append(" ").append(jobRunParamDTO.getAppHome()).append(PropertyUtils.getString(FLINK_SQL_JOB_JAR));
                 command.append(" -sql ").append(jobRunParamDTO.getSqlPath());
                 if (StringUtils.isNotEmpty(jobRunParamDTO.getFlinkCheckpointConfig())) {
                     command.append(" -checkpointDir ").append(jobRunParamDTO.getFlinkCheckpointConfig());
