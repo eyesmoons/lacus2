@@ -24,27 +24,29 @@
 ## 如何使用
 ### 一、系统截图
 - 登录
-![登录](images/lacus_login.png)
+![登录](images/login.png)
 - 首页
 ![首页](images/index-1.png)
 ![首页](images/index-2.png)
 - 元数据-数据源类型
-![元数据-数据源类型](images/datasourceType.png)
+![元数据-数据源类型](images/datasource-type.png)
 - 元数据-数据源定义
-![元数据-数据源定义](images/datasource.png)
+![元数据-数据源定义](images/datasource-define.png)
 - 元数据-数据表查询
-![元数据-数据表查询](images/datasource_table-query.png)
+![元数据-数据表查询](images/datasource_table.png)
 - 数据采集-任务分组
-![数据采集-任务分组](images/job-catalog.png)
+![数据采集-任务分组](images/data-collect-job-catalog.png)
 - 数据采集-任务定义
-![数据采集-任务定义](images/job-list.png)
+![数据采集-任务定义](images/data-collect-job-define.png)
+- 数据采集-任务实例
+![数据采集-任务实例](images/data-collect-job-instance.png)
 - flink开发-任务定义
-![flink开发-任务定义](images/flink-job-define.png)
+![flink开发-任务定义](images/flink-job-define.png)·
 - ![flink开发-任务定义](images/flink-job-edit.png)
 - flink开发-任务实例
 ![flink开发-任务实例](images/flink-job-instance.png)
 - 配置中心-环境管理
-![配置中心-环境管理](images/system-env-config.png)
+![配置中心-环境管理](images/system-env.png)
 - 配置中心-资源管理
 ![配置中心-资源管理](images/system-resource.png)
 ### 二、开发环境
@@ -94,7 +96,7 @@
 **如果嫌麻烦，不想一个一个的去寻找相关 jar 包，我将 flink 1.16.2 所有资源及配置文件放到了我的百度网盘中了。**
 
 **微信关注"毛毛小妖的笔记"公众号，公众号回复关键字"lacus"，即可获得专属网盘链接和密码。**
-![img.png](images/flink-hdfs.png)
+![img.png](images/data-collect-flink.png)
 #### 3. 后端启动
 ```
 - 生成所需的数据库表
@@ -187,4 +189,4 @@ lacus
   - 填入数据库地址，账号密码，库名。然后填入所需的表名执行代码即可。
 
 欢迎关注以下公众号，留言或公众号回复"交流"加入技术交流群，一起学习。
-![img.png](images/communicate.png)
+![img.png](images/contact-us.png)
